@@ -1,0 +1,10 @@
+{
+  "dataset": "nyc_311",
+  "source": "https://data.cityofnewyork.us/resource/erm2-nwe9.csv?%24where=created_date+%3E%3D+%272025-01-01T00%3A00%3A00%27+AND+created_date+%3C+%272025-02-01T00%3A00%3A00%27&%24order=created_date%2Cunique_key&%24limit=1000000",
+  "ingested_at_utc": "2026-10-23T08:47:56.787532+00:00",
+  "bytes": 0,
+  "sha256": null,
+  "destination": "C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\data\\raw\\nyc_311\\ingest_date=2026-10-23\\run_20261023T084756787532Z_455098a9\\source.csv",
+  "status": "failed",
+  "error": "HTTPError: HTTP Error 403: Forbidden"
+}

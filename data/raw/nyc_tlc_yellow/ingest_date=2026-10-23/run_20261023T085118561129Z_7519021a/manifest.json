@@ -1,0 +1,12 @@
+{
+  "dataset": "nyc_tlc_yellow",
+  "source": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-01.parquet",
+  "ingested_at_utc": "2026-10-23T08:51:18.561129+00:00",
+  "bytes": 59158238,
+  "sha256": "9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a",
+  "destination": "C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085118561129Z_7519021a\\yellow_tripdata_2025-01.parquet",
+  "status": "success",
+  "resolved_source": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-01.parquet",
+  "content_type": "binary/octet-stream",
+  "rows": 3475226
+}

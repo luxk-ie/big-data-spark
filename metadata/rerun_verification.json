@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "successful_runs": 3,
+  "runs": [
+    {
+      "manifest": "data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085112919770Z_3632e145\\manifest.json",
+      "bytes": 59158238,
+      "sha256": "9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a",
+      "rows": 3475226,
+      "run_id": "run_20261023T085112919770Z_3632e145"
+    },
+    {
+      "manifest": "data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085118561129Z_7519021a\\manifest.json",
+      "bytes": 59158238,
+      "sha256": "9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a",
+      "rows": 3475226,
+      "run_id": "run_20261023T085118561129Z_7519021a"
+    },
+    {
+      "manifest": "data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085124212690Z_7be43de3\\manifest.json",
+      "bytes": 59158238,
+      "sha256": "9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a",
+      "rows": 3475226,
+      "run_id": "run_20261023T085124212690Z_7be43de3"
+    }
+  ],
+  "sample": "data\\sample\\tlc_yellow_2025-01_1000.parquet",
+  "sample_rows": 1000,
+  "sample_derived_from": "data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085112919770Z_3632e145\\manifest.json",
+  "policy": "Separate snapshot per run; equal hashes identify duplicate content; select one run for analysis."
+}

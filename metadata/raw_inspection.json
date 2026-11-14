@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "master": "local[*]",
+  "spark_version": "3.5.8",
+  "manifest": "C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085112919770Z_3632e145\\manifest.json",
+  "rows": 3475226,
+  "columns": 20,
+  "sha256": "9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a"
+}
