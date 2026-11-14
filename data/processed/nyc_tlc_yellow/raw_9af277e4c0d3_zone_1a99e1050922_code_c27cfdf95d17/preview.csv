@@ -1,0 +1,21 @@
+pickup_date,pickup_hour,pickup_borough,trip_count
+2025-01-01,0,Bronx,42
+2025-01-01,0,Brooklyn,237
+2025-01-01,0,Manhattan,6560
+2025-01-01,0,N/A,1
+2025-01-01,0,Queens,486
+2025-01-01,0,Staten Island,2
+2025-01-01,0,Unknown,16
+2025-01-01,1,Bronx,98
+2025-01-01,1,Brooklyn,499
+2025-01-01,1,Manhattan,7384
+2025-01-01,1,N/A,14
+2025-01-01,1,Queens,458
+2025-01-01,1,Staten Island,2
+2025-01-01,1,Unknown,13
+2025-01-01,2,Bronx,110
+2025-01-01,2,Brooklyn,576
+2025-01-01,2,Manhattan,5997
+2025-01-01,2,N/A,9
+2025-01-01,2,Queens,547
+2025-01-01,2,Staten Island,2

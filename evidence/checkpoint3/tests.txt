@@ -1,0 +1,43 @@
+{"dataset": "taxi", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.364862+00:00", "bytes": 11, "sha256": "4b75f7acec29c6dae647f3c640f1458da8ea3159c59a4c01faed2dfaa517edf0", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmpco8d9388\\raw\\taxi\\ingest_date=2026-11-10\\run_20261110T121728364862Z_1a5bd549\\taxi.parquet", "status": "failed", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "error": "ValueError: Invalid Parquet header"}
+{"dataset": "taxi", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.379757+00:00", "bytes": 15, "sha256": "ac9f5e0a43e5e0fcf0d5e2d06027a1b21e6fea05796c604d662b4ebe99ff2434", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmppbwqmnix\\raw\\taxi\\ingest_date=2026-11-10\\run_20261110T121728379757Z_4acaef63\\taxi.parquet", "status": "failed", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "error": "ArrowInvalid: Parquet file size is 15 bytes, smaller than the size reported by footer's (1684630625bytes)"}
+{"dataset": "taxi", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.395598+00:00", "bytes": 339, "sha256": "f3228f52f5af711da88153f5668000e601f3178d189eb2caeba2f69d33a7d7ba", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmp9ul98295\\raw\\taxi\\ingest_date=2026-11-10\\run_20261110T121728395598Z_2a639f80\\taxi.parquet", "status": "failed", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "error": "ValueError: Parquet contains no rows"}
+test_corrupt_and_empty_parquet_fail (test_ingest.IngestTests.test_corrupt_and_empty_parquet_fail) ... ok
+{"dataset": "nyc_311", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.417685+00:00", "bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmp948gmumz\\raw\\nyc_311\\ingest_date=2026-11-10\\run_20261110T121728417685Z_e7e5315c\\source.csv", "status": "failed", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "error": "ValueError: Empty download"}
+{"dataset": "nyc_311", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.430648+00:00", "bytes": 18, "sha256": "e9d8bb1bdea56d190295fb5ba5049ab4e0d904040605ba2cc2a2c3f32da28b60", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmphlylkytn\\raw\\nyc_311\\ingest_date=2026-11-10\\run_20261110T121728430648Z_85d85177\\source.csv", "status": "failed", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "error": "ValueError: Invalid CSV schema or no data row"}
+{"dataset": "nyc_311", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.444848+00:00", "bytes": 24, "sha256": "954d9f33a74c370b01a352def7860ba0235630df20d890b7831cd961ae64842e", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmp6r8_7hek\\raw\\nyc_311\\ingest_date=2026-11-10\\run_20261110T121728444848Z_28f6de1e\\source.csv", "status": "failed", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "error": "ValueError: Invalid CSV schema or no data row"}
+test_invalid_or_empty_response_fails (test_ingest.IngestTests.test_invalid_or_empty_response_fails) ... ok
+{"dataset": "nyc_311", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.458324+00:00", "bytes": 0, "sha256": null, "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmph0xsv97c\\raw\\nyc_311\\ingest_date=2026-11-10\\run_20261110T121728458324Z_22c648db\\source.csv", "status": "failed", "error": "TimeoutError: fixture timeout"}
+test_network_failure_is_recorded (test_ingest.IngestTests.test_network_failure_is_recorded) ... ok
+{"dataset": "taxi", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.473188+00:00", "bytes": 484, "sha256": "139eb041d18f8217479a02bb22b8d9637370b3d2c5bfa8ec5c95b71cd7680f77", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmpvnpuf0q5\\raw\\taxi\\ingest_date=2026-11-10\\run_20261110T121728473188Z_7d7d235c\\taxi.parquet", "status": "success", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "rows": 2}
+test_parquet_is_closed_before_rename (test_ingest.IngestTests.test_parquet_is_closed_before_rename) ... ok
+{"dataset": "nyc_311", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.487777+00:00", "bytes": 46, "sha256": "8ce41e524c16373f24c238d3cfe0f07cae705d447186f861f1ac8bb4409b865c", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmpc4_t256z\\raw\\nyc_311\\ingest_date=2026-11-10\\run_20261110T121728487777Z_e4ee4a30\\source.csv", "status": "success", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "rows": 1}
+{"dataset": "nyc_311", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.490706+00:00", "bytes": 46, "sha256": "8ce41e524c16373f24c238d3cfe0f07cae705d447186f861f1ac8bb4409b865c", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmpc4_t256z\\raw\\nyc_311\\ingest_date=2026-11-10\\run_20261110T121728490706Z_673249c1\\source.csv", "status": "success", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "rows": 1}
+{"dataset": "nyc_311", "source": "https://example.test/fixture.csv", "ingested_at_utc": "2026-11-10T12:17:28.493507+00:00", "bytes": 46, "sha256": "8ce41e524c16373f24c238d3cfe0f07cae705d447186f861f1ac8bb4409b865c", "destination": "C:\\Users\\ACER\\AppData\\Local\\Temp\\tmpc4_t256z\\raw\\nyc_311\\ingest_date=2026-11-10\\run_20261110T121728493507Z_c62c8ae5\\source.csv", "status": "success", "resolved_source": "https://example.test/fixture.csv", "content_type": "text/csv", "rows": 1}
+test_three_runs_preserve_bytes (test_ingest.IngestTests.test_three_runs_preserve_bytes) ... ok
+test_manifest_checks_status_size_hash_and_sibling (test_pipeline_tlc.ContractTests.test_manifest_checks_status_size_hash_and_sibling) ... ok
+test_zone_csv_contract (test_pipeline_tlc.ContractTests.test_zone_csv_contract) ... ok
+26/11/10 19:17:30 WARN Shell: Did not find winutils.exe: java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/11/10 19:17:30 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+test_scope_unknown_join_and_grain (test_pipeline_tlc.SparkTests.test_scope_unknown_join_and_grain) ... C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=1132, family=2, type=1, proto=0, laddr=('127.0.0.1', 58984), raddr=('127.0.0.1', 58983)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=860, family=2, type=1, proto=0, laddr=('127.0.0.1', 58986), raddr=('127.0.0.1', 58985)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=1112, family=2, type=1, proto=0, laddr=('127.0.0.1', 54453), raddr=('127.0.0.1', 54452)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=1280, family=2, type=1, proto=0, laddr=('127.0.0.1', 54455), raddr=('127.0.0.1', 54454)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 9.913s
+
+OK
+SUCCESS: The process with PID 27360 (child process of PID 13452) has been terminated.
+SUCCESS: The process with PID 13452 (child process of PID 17164) has been terminated.
+SUCCESS: The process with PID 17164 (child process of PID 17044) has been terminated.

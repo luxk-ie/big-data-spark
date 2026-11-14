@@ -1,10 +1,12 @@
 .venv/
 .runtime/
+.report-build/
 __pycache__/
 *.pyc
 .env
 data/raw/**
 !data/raw/.gitkeep
+data/processed/**
 spark-warehouse/
 derby.log
 metastore_db/

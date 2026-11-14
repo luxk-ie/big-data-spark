@@ -1,0 +1,11 @@
+{
+  "status": "VERIFIED",
+  "artifact": "reports/Checkpoint3_Report.pptx",
+  "bytes": 32220,
+  "sha256": "4daf13766ddfb4b5a79b627071281d845c0370a2dcf2521e7dfe51aa0af84dcf",
+  "slide_count": 6,
+  "rendered_pdf_pages": 6,
+  "template_shape_layout_preserved": true,
+  "required_content_missing": [],
+  "visual_review": "Rendered all six slides; inspected contact sheet and corrected title contrast/card overflow."
+}

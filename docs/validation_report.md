@@ -10,6 +10,6 @@ Ngày 23/10/2026, bằng chứng tại repo cục bộ.
 - Automated tests: 5 PASS tại logs/tests.txt; dữ liệu fixture chỉ dùng test, không thay thế evidence nguồn thật. Bao gồm Parquet hỏng/rỗng và regression đóng handle trên Windows.
 - Sample: 1.000 dòng dẫn xuất có snapshot cha; không chỉnh sửa raw.
 - Reproducibility: requirements pin, setup/run scripts và README có lệnh. Chưa chạy trên máy sạch thứ hai; nhánh cài Python fallback chưa kiểm chứng.
-- Report: docs/checkpoint2_report.md có nội dung theo 6 slide và exit ticket; thông tin nhóm/owner/deadline chưa được cung cấp.
+- Report: reports/Checkpoint2_Report.pptx đã điền đủ 6 slide, có speaker notes; đã mở/render và kiểm tra từng slide trong Microsoft PowerPoint. reports/Checkpoint2_Report.docx là phần mẫu nộp đã điền kèm exit ticket, 2 trang; đã render bằng Microsoft Word và kiểm tra ảnh từng trang. Thông tin nhóm/owner/deadline chưa được cung cấp nên được đánh dấu cần bổ sung. Ghi chú pitch phân bổ khoảng 230 giây; chưa đo thuyết trình thật.
 
 Git tag checkpoint-2 là mốc nghiệm thu cục bộ sau khi lưu evidence. Chưa push lên dịch vụ bên ngoài. Team understanding cần từng thành viên tự diễn giải, không thể chứng minh bằng việc script chạy tự động.

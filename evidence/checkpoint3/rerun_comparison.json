@@ -1,0 +1,10 @@
+{
+  "status": "VERIFIED",
+  "same_inputs_code_metrics_schema": true,
+  "gold_parquet_sha256_run1": "72850e09350553b3431befb4c4d1ca686d0f4cc36709de8714fb0bfb5df01aee",
+  "gold_parquet_sha256_run2": "72850e09350553b3431befb4c4d1ca686d0f4cc36709de8714fb0bfb5df01aee",
+  "run1_elapsed_seconds": 24.322,
+  "run2_elapsed_seconds": 23.733,
+  "output_rows_run2": 4652,
+  "code_sha256": "c27cfdf95d17ffb8f4f4c57f7b32e2461b2d684de70fa7770f7e52a7b11d7452"
+}

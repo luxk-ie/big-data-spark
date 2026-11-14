@@ -1,0 +1,66 @@
+{
+  "status": "VERIFIED",
+  "measured_at_utc": "2026-11-10T12:12:49.922996+00:00",
+  "manifest": "C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085112919770Z_3632e145\\manifest.json",
+  "raw_sha256": "9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a",
+  "raw_bytes": 59158238,
+  "lookup": "C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\data\\reference\\taxi_zone_lookup.csv",
+  "lookup_sha256": "1a99e105092230f8620f301edcca7f80d3080642ff404d28ed957d3fa222c8ed",
+  "lookup_bytes": 12331,
+  "lookup_rows": 265,
+  "code_sha256": "c27cfdf95d17ffb8f4f4c57f7b32e2461b2d684de70fa7770f7e52a7b11d7452",
+  "version": "raw_9af277e4c0d3_zone_1a99e1050922_code_c27cfdf95d17",
+  "metrics": {
+    "invalid_pickup_timestamp_rows": 0,
+    "out_of_scope_rows": 22,
+    "in_scope_rows": 3475204,
+    "invalid_dropoff_rows": 124,
+    "invalid_distance_rows": 0,
+    "invalid_amount_rows": 63037,
+    "raw_input_rows": 3475226,
+    "valid_rows": 3475204,
+    "rejected_rows": 0,
+    "zone_status": {
+      "matched": 3475204
+    },
+    "joined_rows": 3475204,
+    "output_rows": 4652,
+    "trip_count": 3475204,
+    "duplicate_full_rows": 0
+  },
+  "output_schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "name": "pickup_date",
+        "type": "date",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "pickup_hour",
+        "type": "integer",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "pickup_borough",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "trip_count",
+        "type": "long",
+        "nullable": true,
+        "metadata": {}
+      }
+    ]
+  },
+  "raw_partitions": 15,
+  "gold_partitions": 1,
+  "spark_version": "3.5.8",
+  "python_version": "3.12.14",
+  "master": "local[*]",
+  "elapsed_seconds": 24.322
+}

@@ -1,4 +1,29 @@
-# Big Data Checkpoint 2
+# Big Data — Yellow Taxi Checkpoint 2 và 3
+
+## Checkpoint 3: nhu cầu đón khách theo giờ và borough
+
+**Trạng thái: VERIFIED trên full snapshot và rerun; xem `reports/checkpoint3.md`.** Pipeline chọn đúng một manifest success của Checkpoint 2, xác minh size/SHA-256, left join với Taxi Zone Lookup chính thức, đếm chuyến theo ngày × giờ × borough, ghi Parquet và evidence theo version. Gold đã aggregate trong Spark được ghi thành một file Parquet nhỏ qua PyArrow vì Spark Hadoop writer trên Windows cần `winutils.exe` ngoài môi trường hiện tại. Spark đọc lại file để kiểm tra. Dữ liệu raw và manifest lịch sử không bị sửa.
+
+```powershell
+./scripts/run.ps1 src/pipeline_tlc.py
+./scripts/run.ps1 src/pipeline_tlc.py  # chạy lại cùng input để đối chiếu
+```
+
+Mặc định dùng `data/raw/nyc_tlc_yellow/ingest_date=2026-10-23/run_20261023T085112919770Z_3632e145/manifest.json` và `data/reference/taxi_zone_lookup.csv`. Có thể truyền `--manifest`, `--zones`, `--output` qua `-ScriptArgs`. Nếu máy khác không có raw cùng hash, cần ingest hoặc chuyển snapshot đúng hash trước khi chạy. Output nằm ở `data/processed/nyc_tlc_yellow/raw_<hash>_zone_<hash>_code_<hash>/` và được Git ignore. `gold.parquet`, `evidence.json`, `plan.txt`, `preview.csv` nằm cùng output; kết quả gọn có thể sao lưu vào `evidence/checkpoint3/` sau khi kiểm chứng. Bảng lookup nhỏ có provenance tại `metadata/taxi_zone_lookup.json`.
+
+`tpep_pickup_datetime` là `timestamp_ntz`; pipeline giữ nguyên giá trị đồng hồ của nguồn và lọc `[2025-01-01, 2025-02-01)`, không suy diễn UTC. Chuyến có mã đón null hoặc không khớp lookup được giữ trong nhóm Unknown riêng. Lỗi ở distance, amount hay dropoff được báo cáo nhưng không loại chuyến khỏi KPI nhu cầu. Xem quy tắc và giới hạn tại `docs/checkpoint3_plan.md`.
+
+Full run đã đo 3.475.226 dòng raw, 3.475.204 chuyến trong phạm vi, 4.652 nhóm Gold; rerun cùng input/code cho cùng SHA-256 Gold. Bằng chứng gọn nằm ở `evidence/checkpoint3/`. Slide theo mẫu giảng viên: `reports/Checkpoint3_Report.pptx` (6 trang; tên nhóm/thành viên cần điền trước khi nộp).
+
+Mốc nghiệm thu kỹ thuật trong Git: tag cục bộ `checkpoint-3`. Repo chưa có remote; nhóm cần điền thông tin và nộp theo hướng dẫn giảng viên.
+
+Kiểm thử:
+
+```powershell
+./scripts/run.ps1 -Script '-m' -ScriptArgs @('unittest', 'discover', '-s', 'tests', '-v')
+```
+
+## Checkpoint 2: ingest raw
 
 Pipeline đã triển khai: **NYC TLC Yellow Taxi tháng 01/2025 → Python HTTP ingestion → local raw Parquet + manifest → Spark read/inspect**.
 
@@ -57,6 +82,8 @@ Manifest cùng run chứa dataset, source, ingested_at_utc, bytes, sha256, desti
 - metadata/rerun_verification.json: checksums kiểm tra lại và run IDs.
 - metadata/source.md: provenance, phiên bản nguồn và điều khoản.
 - docs/checkpoint2_report.md: nội dung báo cáo và exit ticket.
+- reports/Checkpoint2_Report.pptx: báo cáo 6 slide theo mẫu, có speaker notes cho pitch khoảng 4 phút.
+- reports/Checkpoint2_Report.docx: mẫu checkpoint report đã điền, exit ticket và nguồn/evidence, 2 trang.
 
 Repo lưu code, cấu hình mẫu, sample nhỏ, metadata và bằng chứng gọn; không lưu runtime, raw lớn hoặc secret. INSTRUCTIONS.md là quy tắc triển khai. Tag nghiệm thu cục bộ: `checkpoint-2`; dùng `git rev-parse checkpoint-2` để lấy commit hash. Chưa có remote/push.
 
