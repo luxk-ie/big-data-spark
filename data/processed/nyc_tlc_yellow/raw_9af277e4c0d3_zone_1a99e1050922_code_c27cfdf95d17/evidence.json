@@ -1,6 +1,6 @@
 {
   "status": "VERIFIED",
-  "measured_at_utc": "2026-11-14T00:23:32.248778+00:00",
+  "measured_at_utc": "2026-11-13T12:04:36.230636+00:00",
   "manifest": "C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\data\\raw\\nyc_tlc_yellow\\ingest_date=2026-10-23\\run_20261023T085112919770Z_3632e145\\manifest.json",
   "raw_sha256": "9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a",
   "raw_bytes": 59158238,
@@ -62,5 +62,5 @@
   "spark_version": "3.5.8",
   "python_version": "3.12.14",
   "master": "local[*]",
-  "elapsed_seconds": 47.079
+  "elapsed_seconds": 19.768
 }

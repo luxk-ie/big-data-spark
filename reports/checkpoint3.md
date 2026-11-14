@@ -1,68 +1,75 @@
-# Báo cáo Checkpoint 3 — Spark Processing Pipeline
+# Checkpoint 3 - Spark Processing Pipeline
 
-Trạng thái: **VERIFIED** cho full run ngày 10/11/2026; rerun và các hạng mục trình bày xem bảng cuối. Nguồn yêu cầu giảng viên và vị trí slide/brief: `docs/checkpoint3_requirements.md`.
+**Trạng thái:** **VERIFIED** cho full run và rerun trên Yellow Taxi 01/2025. Các số trong báo cáo lấy từ `evidence/checkpoint3/run1.json`, `run2.json` và `rerun_comparison.json`, không lấy từ fixture 1.000 dòng. Nguồn yêu cầu giảng viên theo brief/mục/slide: [`docs/checkpoint3_requirements.md`](../docs/checkpoint3_requirements.md). Câu hỏi phân tích đang dùng: **số chuyến đón khách thay đổi thế nào theo ngày, giờ và borough đón trong tháng 01/2025?**
 
-## Câu hỏi, input và grain
+## 1. Pipeline architecture
 
-**Câu hỏi:** Nhu cầu đón khách Yellow Taxi tháng 01/2025 thay đổi theo ngày, giờ và borough đón như thế nào? KPI chính `trip_count` là số bản ghi chuyến, grain output duy nhất `(pickup_date, pickup_hour, pickup_borough)`. Không diễn giải đây là số hành khách hay doanh thu.
+`Raw Parquet + manifest` → `Read/Schema` → `Select/Cast + Filter` → `Left Join Taxi Zone` → `Quality + đối soát` → `Aggregate` → `Gold Parquet + preview`.
 
-Input raw: một manifest `success` tại `data/raw/nyc_tlc_yellow/ingest_date=2026-10-23/run_20261023T085112919770Z_3632e145/manifest.json`. SHA-256 `9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a`, 59.158.238 bytes. Pipeline xác minh status, dataset, filename, bytes và SHA-256 trước khi Spark đọc. Không đọc wildcard ba run cùng snapshot.
+- **Input fact:** một snapshot raw Yellow Taxi 01/2025, xác minh manifest `success`, dung lượng và SHA-256 trước khi Spark đọc. Không đọc wildcard nhiều run ingest vì chúng trùng nội dung.
+- **Input dimension:** Taxi Zone Lookup CSV do [TLC liên kết](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page), bản sao tại `data/reference/taxi_zone_lookup.csv` và provenance tại `metadata/taxi_zone_lookup.json`.
+- **Processing:** PySpark 3.5.8, `local[*]`; các phép biến đổi, join và aggregate chạy trong `src/pipeline_tlc.py`.
+- **Output:** một version theo raw hash, lookup hash và code hash; gồm `gold.parquet`, `evidence.json`, `plan.txt`, `preview.csv`. Quality được đo trước/sau join và kiểm lại với tổng Gold.
 
-Dimension: [Taxi Zone Lookup CSV do TLC liên kết](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page), bản sao `data/reference/taxi_zone_lookup.csv`, SHA-256 `1a99e105092230f8620f301edcca7f80d3080642ff404d28ed957d3fa222c8ed`, 12.331 bytes, 265 mã `LocationID` duy nhất. `metadata/taxi_zone_lookup.json` ghi provenance. Lookup được kiểm header, mã null và duplicate trước join.
-
-## Pipeline và quy tắc dữ liệu
-
-Lệnh end-to-end:
+Chạy từ thư mục gốc repo:
 
 ```powershell
 ./scripts/run.ps1 src/pipeline_tlc.py
 ```
 
-Các transformation Spark: (1) chọn/cast pickup, dropoff, location ID, distance, amount để giữ hợp đồng cột; (2) lọc pickup trong khoảng nửa mở `[2025-01-01, 2025-02-01)`; (3) derive ngày/giờ pickup và cờ chất lượng; (4) left join `PULocationID = LocationID`; (5) groupBy ngày × giờ × borough để đếm chuyến. Pickup là `timestamp_ntz`, giữ nguyên giờ đồng hồ nguồn; chưa có bằng chứng xác nhận múi giờ. Không tự chuyển UTC.
+## 2. Input contract
 
-Không có trip ID đáng tin để khử trùng chuyến, nên đo duplicate toàn dòng mà không xóa. Dropoff sai hoặc thiếu, distance âm/thiếu và amount âm/thiếu là cờ chất lượng độc lập; chúng không loại chuyến khỏi KPI nhu cầu nếu pickup hợp lệ. Pickup ngoài tháng và pickup null không vào KPI. Key null/unmatched giữ trong nhóm Unknown riêng; borough có trong lookup, kể cả giá trị đặc biệt, giữ nguyên.
-
-Gold được Spark aggregate; PyArrow ghi một file Parquet nhỏ do Spark Hadoop writer trên Windows hiện thiếu `winutils.exe`. Spark đọc lại để xác minh số dòng. Output có version gồm raw hash, lookup hash và code hash; rerun ghi đè đúng file `gold.parquet`, không append. File dữ liệu xử lý lớn được Git ignore.
-
-## Kết quả full run — VERIFIED
-
-Nguồn số: `evidence/checkpoint3/run1.json`; đây là số đo trên full snapshot, không suy ra từ fixture 1.000 dòng.
-
-| Chỉ số | Giá trị |
-| --- | ---: |
-| Raw input | 3.475.226 |
-| Pickup timestamp null | 0 |
-| Pickup ngoài tháng | 22 |
-| Pickup trong tháng | 3.475.204 |
-| Joined rows | 3.475.204 |
-| Matched zone | 3.475.204 |
-| Null/unmatched zone | 0 |
-| Gold rows | 4.652 |
-| Tổng `trip_count` | 3.475.204 |
-| Dropoff thiếu/đi trước pickup trong phạm vi | 124 |
-| Distance âm/thiếu trong phạm vi | 0 |
-| Amount âm/thiếu trong phạm vi | 63.037 |
-| Duplicate toàn dòng | 0 |
-
-Đối soát: `3.475.226 = 0 + 22 + 3.475.204`; `joined_rows = in_scope_rows`; `sum(trip_count) = in_scope_rows`. Không có dòng in-scope bị loại vì KPI chỉ dùng pickup, nên `valid_rows = 3.475.204`, `rejected_rows = 0`. Các cờ chất lượng có thể chồng lấp.
-
-Baseline full run trên code cuối: 24,322 giây; Spark 3.5.8, Python 3.12.14, `local[*]`, 15 raw partitions, 1 Gold partition. Execution plan định dạng formatted: `evidence/checkpoint3/plan.txt`. Đây là baseline máy hiện tại, không hứa hẹn runtime trên máy khác. Gold preview: `evidence/checkpoint3/preview.csv`.
-
-## Đối chiếu yêu cầu
-
-| Mã | Trạng thái | Bằng chứng |
+| Thuộc tính | Yellow Taxi fact | Taxi Zone Lookup dimension |
 | --- | --- | --- |
-| D1–D5 | VERIFIED | `src/pipeline_tlc.py`, full-run metrics và tests; join/aggregate/quality đối soát ở trên |
-| D6 | VERIFIED | runtime, bytes, environment, partitions và formatted plan trong evidence |
-| D7 | PENDING | README, code, báo cáo, preview, 6 slide và commit/tag cục bộ `checkpoint-3` đã có; `evidence/checkpoint3/slide_validation.json` kiểm file PPTX thật. Thông tin nhóm và nộp bài còn chờ |
-| R1 | VERIFIED | `evidence/checkpoint3/rerun_comparison.json`: cùng raw/lookup/code/schema/metrics, SHA-256 Gold bằng nhau, 4.652 dòng sau rerun |
-| T1 | PENDING | Nhóm cần tự giải thích grain, join, KPI và baseline khi trình bày |
+| Dataset | `nyc_tlc_yellow`, file `yellow_tripdata_2025-01.parquet` | `taxi_zone_lookup.csv` |
+| Grain | Một bản ghi chuyến theo nguồn | Một dòng cho một `LocationID` |
+| Key(s) | Không có trip ID duy nhất; `PULocationID` là khóa join, không phải khóa chuyến | `LocationID` không null và unique |
+| Row count **VERIFIED** | 3.475.226 dòng raw / 1 file / 20 cột | 265 dòng / 4 cột / 265 mã unique |
+| Size | 59.158.238 byte | 12.331 byte |
+| SHA-256 | `9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a` | `1a99e105092230f8620f301edcca7f80d3080642ff404d28ed957d3fa222c8ed` |
 
-## Giới hạn và việc tiếp theo
+Manifest được chọn: `data/raw/nyc_tlc_yellow/ingest_date=2026-10-23/run_20261023T085112919770Z_3632e145/manifest.json`. Pickup/dropoff được Spark đọc là `timestamp_ntz`; `PULocationID` là integer. **PENDING:** xác nhận quy ước timezone của nguồn, vì timestamp không mang offset. Pipeline giữ nguyên giá trị đồng hồ nguồn, không tự chuyển UTC. Data dictionary đầy đủ: [`docs/data-description.md`](../docs/data-description.md).
 
-- Chưa xác nhận timezone chính thức của pickup timestamp; biểu diễn ngày/giờ theo giá trị nguồn.
-- Câu hỏi kinh doanh và việc dùng lookup làm dataset join cần đối chiếu proposal/giảng viên nếu có thay đổi.
-- Chưa tối ưu partition, broadcast, cache hoặc skew; đó là phần Buổi 9–10 theo tài liệu.
-- Slide theo mẫu đã có 6 trang; thành viên, owner, deadline và remote nộp bài còn chờ thông tin nhóm.
+## 3. Transformations
 
-Rerun full snapshot thứ hai trên code cuối mất 23,733 giây; cùng output version. Hash file Gold hai lần đều là `72850e09350553b3431befb4c4d1ca686d0f4cc36709de8714fb0bfb5df01aee`. Số dòng sau lần hai vẫn 4.652; file được ghi thay thế, không append. `run1.json`, `run2.json` và `rerun_comparison.json` lưu riêng để đối chiếu.
+1. **Select/cast:** chọn `tpep_pickup_datetime`, `tpep_dropoff_datetime`, `PULocationID`, `trip_distance`, `total_amount`; cast thành `timestamp_ntz`, `int` và `double` để hợp đồng cột rõ ràng.
+2. **Filter phạm vi:** chỉ giữ pickup trong `[2025-01-01 00:00:00, 2025-02-01 00:00:00)`. Full run: 3.475.226 raw = **0 pickup null + 22 ngoài tháng + 3.475.204 trong tháng**.
+3. **Derive và đánh dấu chất lượng:** tạo `pickup_date`, `pickup_hour`; đánh dấu `invalid_dropoff` khi dropoff null hoặc trước pickup, `invalid_distance` khi distance null/âm, `invalid_amount` khi amount null/âm. Full run trong phạm vi: **124** dropoff lỗi, **0** distance lỗi, **63.037** amount lỗi. Các cờ có thể chồng lấp và **không loại chuyến** khỏi KPI đếm pickup.
+
+Không có business key đáng tin để khử trùng chuyến. Pipeline đo **0 duplicate toàn bộ dòng raw** và không tự `dropDuplicates` theo pickup time/zone. `valid_rows = 3.475.204`, `rejected_rows = 0` trong phạm vi phân tích. Nguồn đo: `evidence/checkpoint3/run1.json`; quy tắc: `src/pipeline_tlc.py`.
+
+## 4. Join validation
+
+- **Join type/key:** left join `PULocationID = LocationID`; nhiều chuyến có thể thuộc một zone.
+- **Rows before/after:** fact trong phạm vi **3.475.204**; lookup **265**; sau join **3.475.204**. Join không làm nhân bản hoặc mất fact.
+- **Duplicate keys:** `LocationID` bên lookup được kiểm unique và không null trước join; **0 khóa trùng** trong snapshot này. Duplicate toàn dòng fact: **0**, nhưng đây không phải kiểm khóa chuyến.
+- **Unmatched:** **0** key null/không khớp; **3.475.204 matched**. Nếu một run khác có key null/unmatched, left join vẫn giữ fact và gắn nhãn `Unknown (null key)` hoặc `Unknown (unmatched key)`. Các nhãn `Unknown`, `N/A`, `EWR` vốn có trong lookup vẫn được xem là **matched**, không gộp với unmatched.
+
+Đối soát `joined_rows = in_scope_rows = 3.475.204`. Source: `evidence/checkpoint3/run1.json`; ảnh trích từ file evidence nằm ở slide 4 của `reports/Checkpoint3_Report.pptx`.
+
+## 5. Aggregation & output
+
+- **Output grain:** một dòng cho mỗi tổ hợp `(pickup_date, pickup_hour, pickup_borough)`.
+- **KPI/metrics:** `trip_count = count(*)`, là **số bản ghi chuyến**, không phải số hành khách hoặc doanh thu. Full run có **4.652 nhóm Gold**, `sum(trip_count) = 3.475.204 = in_scope_rows`; key nhóm được kiểm unique.
+- **Schema:** `pickup_date: date`, `pickup_hour: integer`, `pickup_borough: string`, `trip_count: long`.
+- **Output path/format:** `data/processed/nyc_tlc_yellow/raw_9af277e4c0d3_zone_1a99e1050922_code_c27cfdf95d17/gold.parquet` (Parquet). Cùng thư mục có `preview.csv`, `evidence.json`, `plan.txt`. Preview gọn được lưu thêm ở `evidence/checkpoint3/preview.csv`.
+
+Spark thực hiện aggregate. Trên Windows hiện tại, PyArrow ghi file Gold nhỏ vì Spark Hadoop writer cần `winutils.exe`; Spark đọc lại để kiểm số dòng. Rerun cùng input/code ghi thay thế đúng output version, không append. Hai lần chạy có cùng SHA-256 Gold: `72850e09350553b3431befb4c4d1ca686d0f4cc36709de8714fb0bfb5df01aee` (`evidence/checkpoint3/rerun_comparison.json`). Raw và manifest lịch sử không bị ghi đè.
+
+## 6. Baseline
+
+| Chỉ số | Full run **VERIFIED** | Rerun cùng input/code |
+| --- | ---: | ---: |
+| Runtime trên máy này | 24,322 giây | 23,733 giây |
+| Input raw | 59.158.238 byte / 1 Parquet | Cùng snapshot/hash |
+| Partitions observed | raw **15**, Gold **1** | Cùng output logic |
+| Environment | Python 3.12.14, Spark 3.5.8, `local[*]` | Cùng code/config |
+
+`explain("formatted")` đã lưu ở `evidence/checkpoint3/plan.txt` và cạnh Gold tại `data/processed/.../plan.txt`. Plan có `BroadcastHashJoin LeftOuter`, `HashAggregate` và `Exchange`; đây là **baseline trước tối ưu**, chưa có thí nghiệm tối ưu partition/broadcast/cache/skew. Runtime có thể khác trên máy khác hoặc lần chạy khác; chỉ so sánh khi cùng input, code, cấu hình và môi trường. Evidence: `run1.json`, `run2.json`, `rerun_comparison.json`; full run và rerun cùng metrics, schema, hash Gold.
+
+## 7. Blocker & next action
+
+- **Blocker:** không có **BLOCKED** về kỹ thuật cho pipeline Checkpoint 3. **PENDING** xác nhận timezone nguồn; xác nhận câu hỏi/KPI và việc dùng lookup làm dataset join với proposal/giảng viên; điền thông tin nhóm và nơi nộp. D7 còn **PENDING** khâu bàn giao; T1 còn **PENDING** phần trình bày.
+- **Next action — PROPOSED, chờ brief Buổi 9–10:** (1) benchmark trên cùng snapshot và thử tối ưu partition/shuffle, đối chiếu runtime, execution plan và Gold với baseline; (2) mở rộng dữ liệu TLC sang nhiều tháng, kiểm tra schema và chất lượng từng tháng trước khi gộp; (3) nếu phạm vi cho phép, làm dashboard nhỏ để xem nhu cầu theo giờ và borough từ Gold. Đây là hướng phát triển project, chưa phải hạng mục Đồ án 3 đã được giao hoặc nghiệm thu.
+
+Nếu cần chạy lại để trình diễn, dùng lệnh ở mục 1 rồi mở `preview.csv` và `evidence.json` trong đường dẫn `output` lệnh in ra. Khi chuyển repo sang máy khác, cần setup môi trường và ingest/chuyển đúng raw snapshot vì manifest cũ ghi `destination` tuyệt đối của máy tạo.

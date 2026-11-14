@@ -1,0 +1,38 @@
+[
+  {
+    "image": "evidence/checkpoint3/slide_images/run1_metrics.png",
+    "source": "evidence/checkpoint3/run1.json",
+    "source_sha256": "813b6ef8a9d03d5917599a4db94f1344ce233d87bead73ff4fffe1aca09d1f2d",
+    "method": "Word PDF render of original evidence file, cropped to relevant lines",
+    "crop_pixels": [
+      180,
+      900,
+      770,
+      1070
+    ]
+  },
+  {
+    "image": "evidence/checkpoint3/slide_images/gold_preview.png",
+    "source": "evidence/checkpoint3/preview.csv",
+    "source_sha256": "148a682c07d53d2beffbd1683b13ce44616cdbbb54b0352728583f33b991d9c7",
+    "method": "Word PDF render of original evidence file, cropped to relevant lines",
+    "crop_pixels": [
+      160,
+      160,
+      900,
+      338
+    ]
+  },
+  {
+    "image": "evidence/checkpoint3/slide_images/physical_plan.png",
+    "source": "evidence/checkpoint3/plan.txt",
+    "source_sha256": "2463aab0c778fe79b8ba97d47acebae2bd68aaa01931932910b46513e21048d7",
+    "method": "Word PDF render of original evidence file, cropped to relevant lines",
+    "crop_pixels": [
+      160,
+      160,
+      1300,
+      475
+    ]
+  }
+]

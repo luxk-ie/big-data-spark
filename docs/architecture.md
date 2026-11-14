@@ -4,11 +4,11 @@ Trạng thái: Checkpoint 3 đã có `src/pipeline_tlc.py` và lookup snapshot; 
 
 ## Hiện trạng có bằng chứng
 
-`src/ingest_tlc.py` tải file Parquet Yellow Taxi 01/2025 qua `src/ingest_311.py`, lưu nguyên bytes vào một run mới cùng manifest. `src/inspect_raw.py` xác minh dung lượng/hash và Spark đọc được 3.475.226 dòng, 20 cột (`metadata/raw_inspection.json`). Có ba run thành công, cùng checksum; `data/sample/` chỉ có 1.000 dòng dẫn xuất và không đại diện thống kê. Spark 3.5.8 chạy local. Pipeline Checkpoint 3 có full run, join, Gold và baseline tại `evidence/checkpoint3/`.
+`src/ingest_tlc.py` tải file Parquet Yellow Taxi 01/2025 qua module dùng chung `src/ingest_http.py`, lưu nguyên bytes vào một run mới cùng manifest. `src/inspect_raw.py` xác minh dung lượng/hash và Spark đọc được 3.475.226 dòng, 20 cột (`metadata/raw_inspection.json`). Có ba run thành công, cùng checksum; `data/sample/` chỉ có 1.000 dòng dẫn xuất và không đại diện thống kê. Spark 3.5.8 chạy local. Pipeline Checkpoint 3 có full run, join, Gold và baseline tại `evidence/checkpoint3/`.
 
 ## Dòng dữ liệu mục tiêu
 
-Xem [sơ đồ Archify của pipeline đã chạy](../.archify/dataflow-tlc-checkpoint3-20261110-123000/tlc-checkpoint3.html). Sơ đồ đã được cập nhật và vượt qua các cổng kiểm của Archify; số liệu nguồn trong `evidence/checkpoint3/`.
+Sơ đồ pipeline bên dưới mô tả luồng đã chạy; số liệu nguồn nằm trong `evidence/checkpoint3/`.
 
 ```mermaid
 flowchart LR

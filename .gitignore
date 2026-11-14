@@ -1,12 +1,18 @@
 .venv/
 .runtime/
 .report-build/
+.agents/
+.codex/
+.archify/
+AGENTS.md
+INSTRUCTIONS.md
 __pycache__/
 *.pyc
 .env
-data/raw/**
-!data/raw/.gitkeep
-data/processed/**
+# Raw/processed history is committed intentionally; ignore newly generated runs.
+data/raw/
+data/processed/
 spark-warehouse/
-derby.log
 metastore_db/
+derby.log
+

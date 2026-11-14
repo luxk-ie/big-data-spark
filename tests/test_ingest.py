@@ -1,5 +1,6 @@
 import hashlib
 import json
+from contextlib import redirect_stdout
 from pathlib import Path
 import sys
 import tempfile
@@ -10,21 +11,37 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from ingest_311 import ingest
+from ingest_http import ingest
+
+
+DATASET = "nyc_tlc_yellow"
+FILENAME = "yellow_tripdata_2025-01.parquet"
 
 
 class Response(io.BytesIO):
-    headers = {"Content-Type": "text/csv"}
-    url = "https://example.test/fixture.csv"
+    headers = {"Content-Type": "application/octet-stream"}
+    url = "https://example.test/yellow_tripdata_fixture.parquet"
+
+
+def parquet_bytes(rows=2):
+    output = pa.BufferOutputStream()
+    pq.write_table(pa.table({"id": list(range(rows))}), output)
+    return output.getvalue().to_pybytes()
+
+
+def ingest_silently(*args):
+    """Keep fixture manifests out of the unittest evidence stream."""
+    with redirect_stdout(io.StringIO()):
+        return ingest(*args)
 
 
 class IngestTests(unittest.TestCase):
     def test_three_runs_preserve_bytes(self):
-        raw = b'unique_key,created_date\n1,2025-01-01T12:00:00\n'
+        raw = parquet_bytes()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            with patch("ingest_311.ROOT", root), patch("ingest_311.urlopen", side_effect=lambda *a, **k: Response(raw)):
-                paths = [ingest(Response.url, root / "raw") for _ in range(3)]
+            with patch("ingest_http.ROOT", root), patch("ingest_http.urlopen", side_effect=lambda *a, **k: Response(raw)):
+                paths = [ingest_silently(Response.url, root / "raw", DATASET, FILENAME) for _ in range(3)]
             self.assertEqual(len(set(paths)), 3)
             for path in paths:
                 self.assertEqual(path.read_bytes(), raw)
@@ -34,33 +51,31 @@ class IngestTests(unittest.TestCase):
                 self.assertEqual(meta["status"], "success")
 
     def test_invalid_or_empty_response_fails(self):
-        for raw in [b'', b'<html>Error</html>', b'unique_key,created_date\n']:
+        for raw in [b'', b'<html>Error</html>', b'not parquet']:
             with self.subTest(raw=raw), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
-                with patch("ingest_311.ROOT", root), patch("ingest_311.urlopen", return_value=Response(raw)):
+                with patch("ingest_http.ROOT", root), patch("ingest_http.urlopen", return_value=Response(raw)):
                     with self.assertRaises(ValueError):
-                        ingest(Response.url, root / "raw")
+                        ingest_silently(Response.url, root / "raw", DATASET, FILENAME)
                 manifest = next((root / "raw").rglob("manifest.json"))
                 self.assertEqual(json.loads(manifest.read_text())["status"], "failed")
-                self.assertFalse(manifest.with_name("source.csv").exists())
+                self.assertFalse(manifest.with_name(FILENAME).exists())
 
     def test_parquet_is_closed_before_rename(self):
-        output = pa.BufferOutputStream()
-        pq.write_table(pa.table({"id": [1, 2]}), output)
-        raw = output.getvalue().to_pybytes()
+        raw = parquet_bytes()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            with patch("ingest_311.ROOT", root), patch("ingest_311.urlopen", return_value=Response(raw)):
-                path = ingest(Response.url, root / "raw", "taxi", "taxi.parquet")
+            with patch("ingest_http.ROOT", root), patch("ingest_http.urlopen", return_value=Response(raw)):
+                path = ingest_silently(Response.url, root / "raw", DATASET, FILENAME)
             self.assertEqual(path.read_bytes(), raw)
             self.assertEqual(json.loads(path.with_name("manifest.json").read_text())["rows"], 2)
 
     def test_network_failure_is_recorded(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            with patch("ingest_311.ROOT", root), patch("ingest_311.urlopen", side_effect=TimeoutError("fixture timeout")):
+            with patch("ingest_http.ROOT", root), patch("ingest_http.urlopen", side_effect=TimeoutError("fixture timeout")):
                 with self.assertRaises(TimeoutError):
-                    ingest(Response.url, root / "raw")
+                    ingest_silently(Response.url, root / "raw", DATASET, FILENAME)
             manifest = next((root / "raw").rglob("manifest.json"))
             meta = json.loads(manifest.read_text())
             self.assertEqual(meta["status"], "failed")
@@ -68,17 +83,15 @@ class IngestTests(unittest.TestCase):
             self.assertIn("TimeoutError", meta["error"])
 
     def test_corrupt_and_empty_parquet_fail(self):
-        empty = pa.BufferOutputStream()
-        pq.write_table(pa.table({"id": pa.array([], type=pa.int64())}), empty)
-        for raw in [b"not parquet", b"PAR1invalidPAR1", empty.getvalue().to_pybytes()]:
+        for raw in [b"not parquet", b"PAR1invalidPAR1", parquet_bytes(rows=0)]:
             with self.subTest(size=len(raw)), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
-                with patch("ingest_311.ROOT", root), patch("ingest_311.urlopen", return_value=Response(raw)):
+                with patch("ingest_http.ROOT", root), patch("ingest_http.urlopen", return_value=Response(raw)):
                     with self.assertRaises(Exception):
-                        ingest(Response.url, root / "raw", "taxi", "taxi.parquet")
+                        ingest_silently(Response.url, root / "raw", DATASET, FILENAME)
                 manifest = next((root / "raw").rglob("manifest.json"))
                 self.assertEqual(json.loads(manifest.read_text())["status"], "failed")
-                self.assertFalse(manifest.with_name("taxi.parquet").exists())
+                self.assertFalse(manifest.with_name(FILENAME).exists())
 
 
 if __name__ == "__main__":

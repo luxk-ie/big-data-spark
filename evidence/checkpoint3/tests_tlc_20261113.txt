@@ -1,0 +1,21 @@
+Command: ./scripts/run.ps1 -Script '-m' -ScriptArgs @('unittest','discover','-s','tests','-v')
+Run date: 2026-11-13 (Asia/Bangkok)
+Scope: TLC-only ingest and Checkpoint 3 pipeline tests after removing the legacy CSV runtime/test dependency.
+
+test_corrupt_and_empty_parquet_fail (test_ingest.IngestTests.test_corrupt_and_empty_parquet_fail) ... ok
+test_invalid_or_empty_response_fails (test_ingest.IngestTests.test_invalid_or_empty_response_fails) ... ok
+test_network_failure_is_recorded (test_ingest.IngestTests.test_network_failure_is_recorded) ... ok
+test_parquet_is_closed_before_rename (test_ingest.IngestTests.test_parquet_is_closed_before_rename) ... ok
+test_three_runs_preserve_bytes (test_ingest.IngestTests.test_three_runs_preserve_bytes) ... ok
+test_manifest_checks_status_size_hash_and_sibling (test_pipeline_tlc.ContractTests.test_manifest_checks_status_size_hash_and_sibling) ... ok
+test_zone_csv_contract (test_pipeline_tlc.ContractTests.test_zone_csv_contract) ... ok
+26/11/13 13:19:13 WARN Shell: Did not find winutils.exe: java.io.FileNotFoundException: HADOOP_HOME and hadoop.home.dir are unset.
+26/11/13 13:19:13 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform; using builtin-java classes where applicable.
+test_scope_unknown_join_and_grain (test_pipeline_tlc.SparkTests.test_scope_unknown_join_and_grain) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 7.778s
+
+OK
+
+Note: the console also emitted ResourceWarning messages for PySpark sockets. They did not fail the test run; follow-up cleanup can address them separately.

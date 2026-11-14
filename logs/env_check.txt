@@ -7,3 +7,12 @@ OpenJDK 64-Bit Server VM Temurin-17.0.20.1+1 (build 17.0.20.1+1, mixed mode, sha
 2026-10-23 08:49:01,332Z INFO Row count: expected=1000000; actual=1000000
 2026-10-23 08:49:01,846Z INFO Environment check PASSED; elapsed_seconds=18.971
 2026-10-23 08:49:01,855Z INFO Closing down clientserver connection
+2026-11-13 12:04:01,421Z INFO Starting PySpark environment check; master=local[*]
+2026-11-13 12:04:01,421Z INFO Python version=3.12.14
+2026-11-13 12:04:01,495Z INFO Java version: openjdk version "17.0.20.1" 2026-08-18
+OpenJDK Runtime Environment Temurin-17.0.20.1+1 (build 17.0.20.1+1)
+OpenJDK 64-Bit Server VM Temurin-17.0.20.1+1 (build 17.0.20.1+1, mixed mode, sharing)
+2026-11-13 12:04:04,343Z INFO Spark version=3.5.8; master=local[*]
+2026-11-13 12:04:07,250Z INFO Row count: expected=1000000; actual=1000000
+2026-11-13 12:04:07,781Z INFO Environment check PASSED; elapsed_seconds=6.360
+2026-11-13 12:04:07,789Z INFO Closing down clientserver connection

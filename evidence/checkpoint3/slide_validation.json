@@ -1,11 +1,31 @@
 {
   "status": "VERIFIED",
   "artifact": "reports/Checkpoint3_Report.pptx",
-  "bytes": 32220,
-  "sha256": "4daf13766ddfb4b5a79b627071281d845c0370a2dcf2521e7dfe51aa0af84dcf",
+  "bytes": 116820,
+  "sha256": "d5cb57b271444c45f676de4e377558cdf85dc163d7fbeb61d31e19b4cb5f29fa",
+  "template": "BigData_DoAn3_Checkpoint3_Report_Template.pptx",
+  "template_sha256": "7ee506237b9d1cc269dbfe11024cbb0f74c81cfb3088e18c8f7d8ca7aa6ea81a",
   "slide_count": 6,
   "rendered_pdf_pages": 6,
-  "template_shape_layout_preserved": true,
+  "template_shape_geometry_preserved": true,
+  "added_editable_shapes_per_slide": [
+    6,
+    25,
+    17,
+    4,
+    2,
+    2
+  ],
+  "embedded_evidence_images_per_slide": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1
+  ],
+  "image_source_hashes_match": true,
   "required_content_missing": [],
-  "visual_review": "Rendered all six slides; inspected contact sheet and corrected title contrast/card overflow."
+  "placeholder_markers_left": [],
+  "visual_review": "Compared all six rendered slides with the lecturer template; reviewed three cropped evidence images for readability and overlap."
 }
