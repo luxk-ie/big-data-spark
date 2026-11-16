@@ -1,0 +1,101 @@
+== Physical Plan ==
+AdaptiveSparkPlan (17)
++- HashAggregate (16)
+   +- Exchange (15)
+      +- HashAggregate (14)
+         +- Project (13)
+            +- Project (12)
+               +- BroadcastHashJoin LeftOuter BuildRight (11)
+                  :- Project (6)
+                  :  +- Filter (5)
+                  :     +- InMemoryTableScan (1)
+                  :           +- InMemoryRelation (2)
+                  :                 +- * ColumnarToRow (4)
+                  :                    +- Scan parquet  (3)
+                  +- BroadcastExchange (10)
+                     +- Project (9)
+                        +- Filter (8)
+                           +- Scan csv  (7)
+
+
+(1) InMemoryTableScan
+Output [2]: [PULocationID#7, tpep_pickup_datetime#1]
+Arguments: [PULocationID#7, tpep_pickup_datetime#1], [isnotnull(tpep_pickup_datetime#1), (tpep_pickup_datetime#1 >= 2025-01-01 00:00:00), (tpep_pickup_datetime#1 < 2025-02-01 00:00:00)]
+
+(2) InMemoryRelation
+Arguments: [VendorID#0, tpep_pickup_datetime#1, tpep_dropoff_datetime#2, passenger_count#3L, trip_distance#4, RatecodeID#5L, store_and_fwd_flag#6, PULocationID#7, DOLocationID#8, payment_type#9L, fare_amount#10, extra#11, mta_tax#12, tip_amount#13, tolls_amount#14, improvement_surcharge#15, total_amount#16, congestion_surcharge#17, Airport_fee#18, cbd_congestion_fee#19], CachedRDDBuilder(org.apache.spark.sql.execution.columnar.DefaultCachedBatchSerializer@303c2ccc,StorageLevel(disk, memory, deserialized, 1 replicas),*(1) ColumnarToRow
++- FileScan parquet [VendorID#0,tpep_pickup_datetime#1,tpep_dropoff_datetime#2,passenger_count#3L,trip_distance#4,RatecodeID#5L,store_and_fwd_flag#6,PULocationID#7,DOLocationID#8,payment_type#9L,fare_amount#10,extra#11,mta_tax#12,tip_amount#13,tolls_amount#14,improvement_surcharge#15,total_amount#16,congestion_surcharge#17,Airport_fee#18,cbd_congestion_fee#19] Batched: true, DataFilters: [], Format: Parquet, Location: InMemoryFileIndex(1 paths)[file:/C:/Users/ACER/Documents/Coding/big-data-spark/data/raw/nyc_tlc_y..., PartitionFilters: [], PushedFilters: [], ReadSchema: struct<VendorID:int,tpep_pickup_datetime:timestamp_ntz,tpep_dropoff_datetime:timestamp_ntz,passen...
+,None)
+
+(3) Scan parquet 
+Output [20]: [VendorID#0, tpep_pickup_datetime#1, tpep_dropoff_datetime#2, passenger_count#3L, trip_distance#4, RatecodeID#5L, store_and_fwd_flag#6, PULocationID#7, DOLocationID#8, payment_type#9L, fare_amount#10, extra#11, mta_tax#12, tip_amount#13, tolls_amount#14, improvement_surcharge#15, total_amount#16, congestion_surcharge#17, Airport_fee#18, cbd_congestion_fee#19]
+Batched: true
+Location: InMemoryFileIndex [file:/C:/Users/ACER/Documents/Coding/big-data-spark/data/raw/nyc_tlc_yellow/ingest_date=2026-10-23/run_20261023T085112919770Z_3632e145/yellow_tripdata_2025-01.parquet]
+ReadSchema: struct<VendorID:int,tpep_pickup_datetime:timestamp_ntz,tpep_dropoff_datetime:timestamp_ntz,passenger_count:bigint,trip_distance:double,RatecodeID:bigint,store_and_fwd_flag:string,PULocationID:int,DOLocationID:int,payment_type:bigint,fare_amount:double,extra:double,mta_tax:double,tip_amount:double,tolls_amount:double,improvement_surcharge:double,total_amount:double,congestion_surcharge:double,Airport_fee:double,cbd_congestion_fee:double>
+
+(4) ColumnarToRow [codegen id : 1]
+Input [20]: [VendorID#0, tpep_pickup_datetime#1, tpep_dropoff_datetime#2, passenger_count#3L, trip_distance#4, RatecodeID#5L, store_and_fwd_flag#6, PULocationID#7, DOLocationID#8, payment_type#9L, fare_amount#10, extra#11, mta_tax#12, tip_amount#13, tolls_amount#14, improvement_surcharge#15, total_amount#16, congestion_surcharge#17, Airport_fee#18, cbd_congestion_fee#19]
+
+(5) Filter
+Input [2]: [PULocationID#7, tpep_pickup_datetime#1]
+Condition : ((isnotnull(tpep_pickup_datetime#1) AND (tpep_pickup_datetime#1 >= 2025-01-01 00:00:00)) AND (tpep_pickup_datetime#1 < 2025-02-01 00:00:00))
+
+(6) Project
+Output [2]: [tpep_pickup_datetime#1 AS pickup#140, PULocationID#7 AS pickup_location_id#142]
+Input [2]: [PULocationID#7, tpep_pickup_datetime#1]
+
+(7) Scan csv 
+Output [2]: [LocationID#202, Borough#203]
+Batched: false
+Location: InMemoryFileIndex [file:/C:/Users/ACER/Documents/Coding/big-data-spark/data/reference/taxi_zone_lookup.csv]
+ReadSchema: struct<LocationID:string,Borough:string>
+
+(8) Filter
+Input [2]: [LocationID#202, Borough#203]
+Condition : isnotnull(cast(LocationID#202 as int))
+
+(9) Project
+Output [2]: [cast(LocationID#202 as int) AS LocationID#210, Borough#203]
+Input [2]: [LocationID#202, Borough#203]
+
+(10) BroadcastExchange
+Input [2]: [LocationID#210, Borough#203]
+Arguments: HashedRelationBroadcastMode(List(cast(input[0, int, true] as bigint)),false), [plan_id=1293]
+
+(11) BroadcastHashJoin
+Left keys [1]: [pickup_location_id#142]
+Right keys [1]: [LocationID#210]
+Join type: LeftOuter
+Join condition: None
+
+(12) Project
+Output [3]: [pickup#140, Borough#203, CASE WHEN isnull(pickup_location_id#142) THEN null_key WHEN isnull(LocationID#210) THEN unmatched ELSE matched END AS zone_status#260]
+Input [4]: [pickup#140, pickup_location_id#142, LocationID#210, Borough#203]
+
+(13) Project
+Output [3]: [CASE WHEN (zone_status#260 = null_key) THEN Unknown (null key) WHEN (zone_status#260 = unmatched) THEN Unknown (unmatched key) ELSE coalesce(Borough#203, Unknown (lookup null)) END AS pickup_borough#273, cast(pickup#140 as date) AS pickup_date#287, hour(pickup#140, Some(UTC)) AS pickup_hour#302]
+Input [3]: [pickup#140, Borough#203, zone_status#260]
+
+(14) HashAggregate
+Input [3]: [pickup_borough#273, pickup_date#287, pickup_hour#302]
+Keys [3]: [pickup_date#287, pickup_hour#302, pickup_borough#273]
+Functions [1]: [partial_count(1)]
+Aggregate Attributes [1]: [count#2255L]
+Results [4]: [pickup_date#287, pickup_hour#302, pickup_borough#273, count#2256L]
+
+(15) Exchange
+Input [4]: [pickup_date#287, pickup_hour#302, pickup_borough#273, count#2256L]
+Arguments: hashpartitioning(pickup_date#287, pickup_hour#302, pickup_borough#273, 200), ENSURE_REQUIREMENTS, [plan_id=1299]
+
+(16) HashAggregate
+Input [4]: [pickup_date#287, pickup_hour#302, pickup_borough#273, count#2256L]
+Keys [3]: [pickup_date#287, pickup_hour#302, pickup_borough#273]
+Functions [1]: [count(1)]
+Aggregate Attributes [1]: [count(1)#333L]
+Results [4]: [pickup_date#287, pickup_hour#302, pickup_borough#273, count(1)#333L AS trip_count#334L]
+
+(17) AdaptiveSparkPlan
+Output [4]: [pickup_date#287, pickup_hour#302, pickup_borough#273, trip_count#334L]
+Arguments: isFinalPlan=false
+
+
