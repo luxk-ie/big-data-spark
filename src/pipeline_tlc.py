@@ -168,7 +168,7 @@ def run(manifest_path, zones_path, output_root, stage_evidence=False):
     spark = SparkSession.builder.master("local[*]").appName("TLC Checkpoint 3").getOrCreate()
     spark.conf.set("spark.sql.session.timeZone", "UTC")  # No conversion of timestamp_ntz values.
     try:
-        raw = spark.read.parquet(str(raw_path))
+        raw = spark.read.parquet(str(raw_path)).cache()
         facts = transformed(raw)
         zone_frame = (spark.read.option("header", True).option("inferSchema", False).csv(str(zones_path))
                       .select(F.col("LocationID").cast("int").alias("LocationID"), "Borough"))

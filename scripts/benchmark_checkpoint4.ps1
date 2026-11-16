@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('baseline', 'after')][string]$Variant = 'baseline',
+    [ValidateSet('baseline', 'after', 'after_cache')][string]$Variant = 'baseline',
     [ValidateRange(3, 20)][int]$Runs = 3,
     [string]$Manifest = 'data/raw/nyc_tlc_yellow/ingest_date=2026-10-23/run_20261023T085112919770Z_3632e145/manifest.json',
     [string]$Zones = 'data/reference/taxi_zone_lookup.csv'
