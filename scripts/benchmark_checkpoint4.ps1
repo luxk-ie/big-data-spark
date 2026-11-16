@@ -1,6 +1,8 @@
 param(
-    [ValidateSet('baseline', 'after', 'after_cache', 'after_hash')][string]$Variant = 'baseline',
+    [ValidateSet('baseline', 'baseline_repeat', 'after', 'after_cache', 'after_hash')][string]$Variant = 'baseline',
     [ValidateRange(3, 20)][int]$Runs = 3,
+    [string]$PipelineScript = 'src/pipeline_tlc.py',
+    [string]$SourceRef = 'HEAD',
     [string]$Manifest = 'data/raw/nyc_tlc_yellow/ingest_date=2026-10-23/run_20261023T085112919770Z_3632e145/manifest.json',
     [string]$Zones = 'data/reference/taxi_zone_lookup.csv'
 )
@@ -9,8 +11,8 @@ $root = Split-Path $PSScriptRoot -Parent
 $batch = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ')
 $csvPath = Join-Path $root 'reports/benchmark.csv'
 $memory = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory
-$commit = (git -C $root rev-parse HEAD).Trim()
-$pipelineDirty = [bool](git -C $root status --porcelain -- src/pipeline_tlc.py)
+$commit = (git -C $root rev-parse $SourceRef).Trim()
+$pipelineDirty = [bool](git -C $root status --porcelain -- $PipelineScript)
 $invariant = [System.Globalization.CultureInfo]::InvariantCulture
 
 foreach ($number in 0..$Runs) {
@@ -18,7 +20,7 @@ foreach ($number in 0..$Runs) {
     $runRoot = Join-Path $root "data/processed/checkpoint4/$Variant/$batch/$label"
     New-Item -ItemType Directory -Path $runRoot -Force | Out-Null
     Write-Host "Checkpoint 4 $Variant $label ($batch)"
-    & (Join-Path $PSScriptRoot 'run.ps1') -Script 'src/pipeline_tlc.py' -ScriptArgs @(
+    & (Join-Path $PSScriptRoot 'run.ps1') -Script $PipelineScript -ScriptArgs @(
         '--manifest', $Manifest, '--zones', $Zones, '--output', $runRoot, '--stage-evidence'
     ) *> (Join-Path $runRoot 'console.log')
     if ($LASTEXITCODE -ne 0) { throw "Pipeline failed for $label. See $runRoot/console.log" }

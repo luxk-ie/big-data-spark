@@ -1,0 +1,33 @@
+test_corrupt_and_empty_parquet_fail (test_ingest.IngestTests.test_corrupt_and_empty_parquet_fail) ... ok
+test_invalid_or_empty_response_fails (test_ingest.IngestTests.test_invalid_or_empty_response_fails) ... ok
+test_network_failure_is_recorded (test_ingest.IngestTests.test_network_failure_is_recorded) ... ok
+test_parquet_is_closed_before_rename (test_ingest.IngestTests.test_parquet_is_closed_before_rename) ... ok
+test_three_runs_preserve_bytes (test_ingest.IngestTests.test_three_runs_preserve_bytes) ... ok
+test_manifest_checks_status_size_hash_and_sibling (test_pipeline_tlc.ContractTests.test_manifest_checks_status_size_hash_and_sibling) ... ok
+test_zone_csv_contract (test_pipeline_tlc.ContractTests.test_zone_csv_contract) ... ok
+26/11/16 20:50:28 WARN Shell: Did not find winutils.exe: java.io.FileNotFoundException: java.io.FileNotFoundException: HADOOP_HOME and hadoop.home.dir are unset. -see https://wiki.apache.org/hadoop/WindowsProblems
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/11/16 20:50:29 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+test_duplicate_fast_path_and_exact_fallback (test_pipeline_tlc.SparkTests.test_duplicate_fast_path_and_exact_fallback) ... ok
+test_scope_unknown_join_and_grain (test_pipeline_tlc.SparkTests.test_scope_unknown_join_and_grain) ... C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=1092, family=2, type=1, proto=0, laddr=('127.0.0.1', 50190), raddr=('127.0.0.1', 50189)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=1212, family=2, type=1, proto=0, laddr=('127.0.0.1', 50195), raddr=('127.0.0.1', 50194)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=1164, family=2, type=1, proto=0, laddr=('127.0.0.1', 50197), raddr=('127.0.0.1', 50196)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+C:\Users\ACER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\socket.py:791: ResourceWarning: unclosed <socket.socket fd=1220, family=2, type=1, proto=0, laddr=('127.0.0.1', 50199), raddr=('127.0.0.1', 50198)>
+  self._sock = None
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 11.560s
+
+OK
+SUCCESS: The process with PID 29584 (child process of PID 25840) has been terminated.
+SUCCESS: The process with PID 25840 (child process of PID 7392) has been terminated.
+SUCCESS: The process with PID 7392 (child process of PID 10708) has been terminated.

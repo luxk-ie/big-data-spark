@@ -35,3 +35,19 @@ Expected signal: stage 35 có 29 task thay vì 15; disk spill của jobs 22–23
 **Observation VERIFIED:** action exact full-row distinct là bottleneck lớn nhất, với median 7,381 s và 194.391.139 shuffle bytes ở stage 35 của baseline run1; stage 35+37 spill 339.151.566 disk bytes. Baseline có `duplicate_full_rows=0` trên snapshot đã xác minh SHA-256.
 
 **PROPOSED — một thay đổi thuật toán cho cùng metric:** tính `xxhash64` trên toàn bộ cột của mỗi raw row, rồi đếm số fingerprint duy nhất. Nếu số fingerprint bằng `raw_count`, suy ra chắc chắn không có hai row giống nhau và trả `duplicate_full_rows=0`. Nếu có fingerprint lặp (bao gồm cả hash collision), **fallback** về `raw.distinct().count()` hiện tại để tính chính xác. Như vậy không chấp nhận sai số do hash collision. Kỳ vọng đường nhanh trên snapshot này shuffle khóa 64-bit thay vì 20 cột đầy đủ, giảm spill và median của action duplicate, giữ các count/schema/Gold SHA-256. Nếu fingerprint lặp hoặc chi phí hash cao làm median không giảm rõ, REVERT. Giữ input, tài nguyên, Spark config và quy tắc output như baseline.
+
+## Kết quả thí nghiệm 3 — fingerprint exact fallback
+
+**VERIFIED:** commit code `afdbdce`; 9 test qua, gồm fixture không trùng, có dòng trùng/null và fallback exact. Batch đầu `20261116T134054331Z`: 22,635 / 23,217 / 23,882 s, median **23,217 s** so với baseline 23,884 s (**giảm 2,79%**). Median action duplicate 4,041 s so với 7,381 s (**giảm 45,25%**). Ở run1, shuffle read/write toàn pipeline giảm từ 195.077.820 xuống 36.722.052 bytes; disk spill từ 339.151.566 xuống **0**. `reports/explain-before.txt` cho thấy exchange theo 20 cột; `reports/explain-after.txt` theo một `row_fingerprint` 64-bit.
+
+**VERIFIED repeat để kiểm độ dao động:** batch after thứ hai `20261116T134326828Z` có 5 run 20,493 / 20,951 / 20,944 / 22,387 / 20,963 s, median **20,951 s**. Đo lại đúng bytes code từ tag baseline (SHA-256 `7fd32c7141945ecf7fdb235c770826566a872f48737cbb20ad6f1abb5dfde7cd`) ngay sau đó: batch `20261116T134712795Z` có 3 run 25,250 / 24,373 / 25,621 s, median **25,250 s**. So hai batch gần thời điểm nhau, median giảm **17,03%**; các khoảng min–max không chồng lấp. Các batch có runtime khác nhau nên không lấy 17,03% làm speedup duy nhất cho mọi máy/lần chạy.
+
+**VERIFIED correctness:** 8 run after và 3 run baseline đo lại có cùng raw/lookup hash, Spark/master/cores/memory/AQE/shuffle config, toàn bộ quality metrics, schema 4 cột và Gold SHA-256 `72850e09350553b3431befb4c4d1ca686d0f4cc36709de8714fb0bfb5df01aee` với baseline ban đầu. `duplicate_full_rows=0` và nhánh fallback được test với fixture có duplicate. Bằng chứng từng run: `reports/benchmark.csv`, `evidence/checkpoint4/after_hash/`, `evidence/checkpoint4/baseline_repeat/`, `evidence/checkpoint4/tests.txt`.
+
+**Decision: KEEP** nhánh fingerprint + exact fallback. Tín hiệu shuffle/spill và thời gian action đúng giả thuyết; hai đợt đo sau đều có median thấp hơn baseline tương ứng. Giới hạn: dữ liệu chỉ một tháng trên một máy; warm-up và tải máy tạo biến thiên rõ giữa batch; nhánh fallback có thể đắt hơn trên snapshot chứa fingerprint lặp; chưa benchmark dữ liệu tăng 10×.
+
+Để đối chiếu lại baseline gần thời điểm batch sau, đã chép **đúng bytes** `src/pipeline_tlc.py` từ tag `checkpoint4-baseline` sang file tạm `src/_checkpoint4_baseline.py`, xác nhận SHA-256 bằng baseline, chạy lệnh dưới đây rồi xóa file tạm. Cột `pipeline_dirty=True` của batch repeat chỉ nói file chạy là bản sao tạm chưa track; `code_sha256` khớp tag baseline.
+
+```powershell
+./scripts/benchmark_checkpoint4.ps1 -Variant baseline_repeat -Runs 3 -PipelineScript 'src/_checkpoint4_baseline.py' -SourceRef 'checkpoint4-baseline'
+```
