@@ -4,8 +4,10 @@ import csv
 import hashlib
 import io
 import json
+import os
 import platform
 import time
+import urllib.request
 from contextlib import redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
@@ -132,7 +134,30 @@ def counts(facts, joined, gold, raw_count):
     return flags
 
 
-def run(manifest_path, zones_path, output_root):
+def capture_stages(spark, output):
+    ui = spark.sparkContext.uiWebUrl
+    if not ui:
+        raise RuntimeError("Spark UI is required for Checkpoint 4 stage evidence")
+    url = f"{ui}/api/v1/applications/{spark.sparkContext.applicationId}/stages?status=complete"
+    with urllib.request.urlopen(url, timeout=15) as response:
+        stages = json.load(response)
+    if not stages:
+        raise RuntimeError("Spark UI returned no completed stages")
+    fields = ("stageId", "attemptId", "name", "submissionTime", "completionTime", "numTasks",
+              "executorRunTime", "jvmGcTime", "inputBytes", "inputRecords", "shuffleReadBytes",
+              "shuffleWriteBytes", "memoryBytesSpilled", "diskBytesSpilled")
+    summary = [{key: stage.get(key) for key in fields} for stage in stages]
+    (output / "stages.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    jobs_url = f"{ui}/api/v1/applications/{spark.sparkContext.applicationId}/jobs?status=succeeded"
+    with urllib.request.urlopen(jobs_url, timeout=15) as response:
+        jobs = json.load(response)
+    job_fields = ("jobId", "name", "stageIds", "submissionTime", "completionTime", "numTasks")
+    (output / "jobs.json").write_text(json.dumps(
+        [{key: job.get(key) for key in job_fields} for job in jobs], indent=2), encoding="utf-8")
+    return len(summary)
+
+
+def run(manifest_path, zones_path, output_root, stage_evidence=False):
     started = time.perf_counter()
     manifest, raw_path = validate_manifest(manifest_path)
     zones_path, zone_count, zone_hash = validate_zones(zones_path)
@@ -149,9 +174,14 @@ def run(manifest_path, zones_path, output_root):
                       .select(F.col("LocationID").cast("int").alias("LocationID"), "Borough"))
         joined, gold = demand(facts, zone_frame)
         raw_count = raw.count()
+        action_seconds = {}
+        action_started = time.perf_counter()
         metrics = counts(facts, joined, gold, raw_count)
+        action_seconds["quality_and_gold_checks"] = round(time.perf_counter() - action_started, 3)
         # Whole-row duplicates are observed, never removed. Use raw columns, not reduced projection.
+        action_started = time.perf_counter()
         metrics["duplicate_full_rows"] = raw_count - raw.distinct().count()
+        action_seconds["duplicate_full_rows"] = round(time.perf_counter() - action_started, 3)
         plan_stream = io.StringIO()
         with redirect_stdout(plan_stream):
             gold.explain("formatted")
@@ -159,7 +189,9 @@ def run(manifest_path, zones_path, output_root):
         (output / "plan.txt").write_text(plan, encoding="utf-8")
         # Spark's Windows Hadoop writer requires winutils.exe, absent from this local setup.
         # Gold is at most 31 * 24 * zone-groups rows; collect only this aggregate.
+        action_started = time.perf_counter()
         gold_rows = sorted(gold.collect(), key=lambda row: (row.pickup_date, row.pickup_hour, row.pickup_borough))
+        action_seconds["gold_collect"] = round(time.perf_counter() - action_started, 3)
         table = pa.table({
             "pickup_date": pa.array([row.pickup_date for row in gold_rows], type=pa.date32()),
             "pickup_hour": pa.array([row.pickup_hour for row in gold_rows], type=pa.int32()),
@@ -175,6 +207,8 @@ def run(manifest_path, zones_path, output_root):
             writer = csv.DictWriter(stream, fieldnames=["pickup_date", "pickup_hour", "pickup_borough", "trip_count"])
             writer.writeheader()
             writer.writerows(preview)
+        elapsed = round(time.perf_counter() - started, 3)
+        stage_count = capture_stages(spark, output) if stage_evidence else None
         evidence = {"status": "VERIFIED", "measured_at_utc": datetime.now(timezone.utc).isoformat(),
                     "manifest": str(Path(manifest_path).resolve()), "raw_sha256": manifest["sha256"],
                     "raw_bytes": raw_path.stat().st_size, "lookup": str(zones_path), "lookup_sha256": zone_hash,
@@ -183,7 +217,16 @@ def run(manifest_path, zones_path, output_root):
                     "output_schema": read_back.schema.jsonValue(), "raw_partitions": raw.rdd.getNumPartitions(),
                     "gold_partitions": gold.rdd.getNumPartitions(), "spark_version": spark.version,
                     "python_version": platform.python_version(), "master": spark.sparkContext.master,
-                    "elapsed_seconds": round(time.perf_counter() - started, 3)}
+                    "elapsed_seconds": elapsed}
+        if stage_evidence:
+            evidence["benchmark_context"] = {
+                "logical_cores": os.cpu_count(), "spark_default_parallelism": spark.sparkContext.defaultParallelism,
+                "driver_memory": spark.sparkContext.getConf().get("spark.driver.memory", "not explicitly set"),
+                "aqe_enabled": spark.conf.get("spark.sql.adaptive.enabled"),
+                "shuffle_partitions": spark.conf.get("spark.sql.shuffle.partitions"),
+                "completed_stages": stage_count,
+            }
+            evidence["action_seconds"] = action_seconds
         (output / "evidence.json").write_text(json.dumps(evidence, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
         print(json.dumps({"output": str(output), "metrics": metrics, "elapsed_seconds": evidence["elapsed_seconds"]}, ensure_ascii=False))
         return evidence
@@ -196,5 +239,6 @@ if __name__ == "__main__":
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--zones", type=Path, default=DEFAULT_ZONES)
     parser.add_argument("--output", type=Path, default=ROOT / "data/processed/nyc_tlc_yellow")
+    parser.add_argument("--stage-evidence", action="store_true", help="Save completed Spark stage metrics from the live UI")
     args = parser.parse_args()
-    run(args.manifest, args.zones, args.output)
+    run(args.manifest, args.zones, args.output, args.stage_evidence)
