@@ -134,6 +134,14 @@ def counts(facts, joined, gold, raw_count):
     return flags
 
 
+def count_duplicate_full_rows(raw, raw_count):
+    # Identical rows always share a fingerprint; any repeated fingerprint falls back to exact counting.
+    fingerprints = raw.select(F.xxhash64(*raw.columns).alias("row_fingerprint"))
+    if fingerprints.distinct().count() == raw_count:
+        return 0
+    return raw_count - raw.distinct().count()
+
+
 def capture_stages(spark, output):
     ui = spark.sparkContext.uiWebUrl
     if not ui:
@@ -168,7 +176,7 @@ def run(manifest_path, zones_path, output_root, stage_evidence=False):
     spark = SparkSession.builder.master("local[*]").appName("TLC Checkpoint 3").getOrCreate()
     spark.conf.set("spark.sql.session.timeZone", "UTC")  # No conversion of timestamp_ntz values.
     try:
-        raw = spark.read.parquet(str(raw_path)).cache()
+        raw = spark.read.parquet(str(raw_path))
         facts = transformed(raw)
         zone_frame = (spark.read.option("header", True).option("inferSchema", False).csv(str(zones_path))
                       .select(F.col("LocationID").cast("int").alias("LocationID"), "Borough"))
@@ -180,7 +188,7 @@ def run(manifest_path, zones_path, output_root, stage_evidence=False):
         action_seconds["quality_and_gold_checks"] = round(time.perf_counter() - action_started, 3)
         # Whole-row duplicates are observed, never removed. Use raw columns, not reduced projection.
         action_started = time.perf_counter()
-        metrics["duplicate_full_rows"] = raw_count - raw.distinct().count()
+        metrics["duplicate_full_rows"] = count_duplicate_full_rows(raw, raw_count)
         action_seconds["duplicate_full_rows"] = round(time.perf_counter() - action_started, 3)
         plan_stream = io.StringIO()
         with redirect_stdout(plan_stream):

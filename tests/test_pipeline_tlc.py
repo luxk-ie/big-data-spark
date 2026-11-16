@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pyspark.sql import SparkSession
 
-from src.pipeline_tlc import counts, demand, sha256, transformed, validate_manifest, validate_zones
+from src.pipeline_tlc import count_duplicate_full_rows, counts, demand, sha256, transformed, validate_manifest, validate_zones
 
 
 class ContractTests(unittest.TestCase):
@@ -72,6 +72,13 @@ class SparkTests(unittest.TestCase):
         duplicate_zones = spark.sql("SELECT * FROM VALUES (1,'Queens'),(1,'Bronx') AS t(LocationID,Borough)")
         with self.assertRaises(ValueError):
             demand(facts, duplicate_zones)
+
+    def test_duplicate_fast_path_and_exact_fallback(self):
+        raw = self.spark.sql("""SELECT 1 AS id, 'A' AS zone
+            UNION ALL SELECT 2, CAST(NULL AS STRING)
+            UNION ALL SELECT 2, CAST(NULL AS STRING)""")
+        self.assertEqual(count_duplicate_full_rows(raw.limit(1), 1), 0)
+        self.assertEqual(count_duplicate_full_rows(raw, 3), 1)
 
 
 if __name__ == "__main__":
