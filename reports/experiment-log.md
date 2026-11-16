@@ -1,0 +1,13 @@
+# Nhật ký thí nghiệm Checkpoint 4
+
+## Baseline và quan sát trước khi đổi cấu hình — 16/11/2026
+
+**VERIFIED:** tag `checkpoint4-baseline` → commit `e4dc1f0`; một manifest Yellow Taxi 01/2025 có SHA-256 `9af277e4c0d3f9deb30644da822981e1e7df6af58313170fd3aa8a474485488a`; lookup SHA-256 `1a99e105092230f8620f301edcca7f80d3080642ff404d28ed957d3fa222c8ed`. Pipeline code SHA-256 của ba lần đo: `7fd32c7141945ecf7fdb235c770826566a872f48737cbb20ad6f1abb5dfde7cd`. Spark 3.5.8, `local[*]`, 18 logical cores, RAM vật lý 16.886.128.640 bytes, AQE bật, `spark.sql.shuffle.partitions=200`; driver memory không được đặt riêng. `spark.sql.files.maxPartitionBytes` là mặc định `134217728b` (đã kiểm bằng Spark session cùng máy). Warm-up 24,183 s không tính. Ba run đo 23,884 / 23,791 / 24,084 s; median **23,884 s**, khoảng min–max 0,293 s. Nguồn từng run: `reports/benchmark.csv` và output riêng dưới `data/processed/checkpoint4/baseline/20261116T063305911Z/`.
+
+**VERIFIED:** cả bốn run có 3.475.226 raw rows, 3.475.204 in-scope/joined/trips, 4.652 Gold rows, cùng Gold SHA-256 `72850e09350553b3431befb4c4d1ca686d0f4cc36709de8714fb0bfb5df01aee`. Mỗi run đo lưu 31 completed stages và 31 jobs. `raw.distinct().count()` để tính `duplicate_full_rows` mất 7,399 / 7,301 / 7,381 s (median 7,381 s, khoảng 31% runtime toàn pipeline). Ở run1, stage 35 đọc raw, ghi 194.391.139 shuffle bytes và spill 158.828.820 disk bytes; stage 37 đọc shuffle đó và spill thêm 180.322.746 disk bytes. Jobs 22–23 và khoảng thời gian khớp action `duplicate_full_rows`; hai stage này là bottleneck ưu tiên. `plan.txt`, `jobs.json`, `stages.json`, `evidence.json` của từng run nằm cùng output.
+
+## Giả thuyết đăng ký trước phép đo after
+
+**PROPOSED — một biến:** giảm `spark.sql.files.maxPartitionBytes` từ mặc định `134217728b` xuống `2097152` bytes. Probe trên đúng raw file cho thấy số partition đọc Parquet tăng từ 15 lên 29. **Nếu** stage 35 spill vì mỗi task phải tổng hợp quá nhiều full rows, **thì** tăng partition đầu vào có thể giảm spill/task và thời gian `duplicate_full_rows`, kéo median toàn pipeline xuống; **trong khi** input hash, `duplicate_full_rows`, các quality count, schema/Gold hash giữ nguyên. Chỉ đổi cấu hình này qua `PYSPARK_SUBMIT_ARGS`; giữ code pipeline, master, cores, memory, AQE, shuffle partitions, manifest/lookup và warm-up giống baseline.
+
+Expected signal: stage 35 có 29 task thay vì 15; disk spill của jobs 22–23 giảm, thời gian action duplicate giảm. Nếu thêm task làm tổng thời gian tăng hoặc spill không giảm, REVERT. Chỉ KEEP khi tất cả correctness assertions khớp, signal thực thi phù hợp và mức giảm median lớn hơn dao động 0,293 s quan sát ở baseline; nếu hiệu ứng nhỏ, ghi INCONCLUSIVE/REVERT. Đây là giả thuyết, **chưa có số liệu after**.

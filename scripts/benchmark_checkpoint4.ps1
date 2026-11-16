@@ -11,6 +11,7 @@ $csvPath = Join-Path $root 'reports/benchmark.csv'
 $memory = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory
 $commit = (git -C $root rev-parse HEAD).Trim()
 $pipelineDirty = [bool](git -C $root status --porcelain -- src/pipeline_tlc.py)
+$invariant = [System.Globalization.CultureInfo]::InvariantCulture
 
 foreach ($number in 0..$Runs) {
     $label = if ($number -eq 0) { 'warmup' } else { "run$number" }
@@ -40,10 +41,10 @@ foreach ($number in 0..$Runs) {
         physical_memory_bytes = $memory; driver_memory = $evidence.benchmark_context.driver_memory
         aqe_enabled = $evidence.benchmark_context.aqe_enabled
         shuffle_partitions = $evidence.benchmark_context.shuffle_partitions
-        elapsed_seconds = $evidence.elapsed_seconds
-        quality_and_gold_seconds = $evidence.action_seconds.quality_and_gold_checks
-        duplicate_full_seconds = $evidence.action_seconds.duplicate_full_rows
-        gold_collect_seconds = $evidence.action_seconds.gold_collect
+        elapsed_seconds = $evidence.elapsed_seconds.ToString('0.000', $invariant)
+        quality_and_gold_seconds = $evidence.action_seconds.quality_and_gold_checks.ToString('0.000', $invariant)
+        duplicate_full_seconds = $evidence.action_seconds.duplicate_full_rows.ToString('0.000', $invariant)
+        gold_collect_seconds = $evidence.action_seconds.gold_collect.ToString('0.000', $invariant)
         raw_input_rows = $evidence.metrics.raw_input_rows
         in_scope_rows = $evidence.metrics.in_scope_rows
         joined_rows = $evidence.metrics.joined_rows
@@ -58,7 +59,7 @@ foreach ($number in 0..$Runs) {
     Write-Host "$label`: $($evidence.elapsed_seconds) s; Gold SHA-256 $goldHash"
 }
 $measured = @(Import-Csv $csvPath | Where-Object { $_.batch -eq $batch -and $_.variant -eq $Variant -and $_.warmup -eq 'False' } |
-    ForEach-Object { [double]$_.elapsed_seconds } | Sort-Object)
+    ForEach-Object { [double]::Parse($_.elapsed_seconds, $invariant) } | Sort-Object)
 $median = $measured[[int][Math]::Floor($measured.Count / 2)]
 if ($measured.Count % 2 -eq 0) { $median = ($measured[$measured.Count / 2 - 1] + $measured[$measured.Count / 2]) / 2 }
-Write-Host "Median $Variant ($($measured.Count) measured runs): $median s"
+Write-Host "Median $Variant ($($measured.Count) measured runs): $($median.ToString('0.000', $invariant)) s"
