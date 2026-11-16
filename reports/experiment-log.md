@@ -10,4 +10,16 @@
 
 **PROPOSED — một biến:** giảm `spark.sql.files.maxPartitionBytes` từ mặc định `134217728b` xuống `2097152` bytes. Probe trên đúng raw file cho thấy số partition đọc Parquet tăng từ 15 lên 29. **Nếu** stage 35 spill vì mỗi task phải tổng hợp quá nhiều full rows, **thì** tăng partition đầu vào có thể giảm spill/task và thời gian `duplicate_full_rows`, kéo median toàn pipeline xuống; **trong khi** input hash, `duplicate_full_rows`, các quality count, schema/Gold hash giữ nguyên. Chỉ đổi cấu hình này qua `PYSPARK_SUBMIT_ARGS`; giữ code pipeline, master, cores, memory, AQE, shuffle partitions, manifest/lookup và warm-up giống baseline.
 
-Expected signal: stage 35 có 29 task thay vì 15; disk spill của jobs 22–23 giảm, thời gian action duplicate giảm. Nếu thêm task làm tổng thời gian tăng hoặc spill không giảm, REVERT. Chỉ KEEP khi tất cả correctness assertions khớp, signal thực thi phù hợp và mức giảm median lớn hơn dao động 0,293 s quan sát ở baseline; nếu hiệu ứng nhỏ, ghi INCONCLUSIVE/REVERT. Đây là giả thuyết, **chưa có số liệu after**.
+Expected signal: stage 35 có 29 task thay vì 15; disk spill của jobs 22–23 giảm, thời gian action duplicate giảm. Nếu thêm task làm tổng thời gian tăng hoặc spill không giảm, REVERT. Chỉ KEEP khi tất cả correctness assertions khớp, signal thực thi phù hợp và mức giảm median lớn hơn dao động 0,293 s quan sát ở baseline; nếu hiệu ứng nhỏ, ghi INCONCLUSIVE/REVERT. Tại lúc đăng ký giả thuyết, **chưa có số liệu after**.
+
+## Kết quả thí nghiệm 1 — partition đọc Parquet
+
+**VERIFIED:** chạy 1 warm-up + 3 run với `PYSPARK_SUBMIT_ARGS='--conf spark.sql.files.maxPartitionBytes=2097152 pyspark-shell'`, batch `20261116T063912865Z`. Runtime đo: 24,187 / 24,850 / 24,985 s; median **24,850 s**, lâu hơn baseline 0,966 s (~4,0%). Số raw partitions và task stage 35 tăng 15 → 29, nhưng disk spill của stage 35+37 ở run1 là 339.151.603 bytes so với baseline 339.151.566 bytes: gần như không đổi. Median action duplicate 7,409 s so với 7,381 s baseline. Dữ liệu `reports/benchmark.csv`, `evidence/checkpoint4/after_partition/run1`–`run3`.
+
+**VERIFIED correctness:** cả ba run after có cùng raw/lookup/code SHA-256, toàn bộ quality metrics, output schema và Gold SHA-256 với baseline. **Decision: REVERT** cấu hình 2 MiB; expected signal giảm spill và runtime không xảy ra. Số partition tăng nhưng không giải quyết được phần hash aggregate/shuffle gây spill.
+
+## Giả thuyết thí nghiệm 2 — đăng ký trước khi sửa code
+
+**Observation VERIFIED:** ở baseline run1 có 6 stage đọc hơn 1 MB từ Parquet, tổng `inputBytes` 172.349.342 bytes; nhiều action trên cùng snapshot kéo lại raw lineage. Full-row distinct vẫn là action đơn lẻ tốn thời gian nhất, nhưng các scan lặp là chi phí cộng dồn có thể tránh.
+
+**PROPOSED — một thay đổi code:** cache DataFrame `raw` trước action đầu tiên; Spark process độc lập cho từng run nên cache luôn bắt đầu rỗng và thời gian materialize được tính vào elapsed. **Nếu** đọc lại raw/transform nhiều lần đóng góp đáng kể vào runtime, **thì** các stage sau sẽ dùng `InMemoryTableScan` và tổng input Parquet bytes giảm, median toàn pipeline giảm; **trong khi** input hash, row counts, `duplicate_full_rows`, schema và Gold SHA-256 giữ nguyên. Giữ nguyên mọi Spark config, resources, manifest/lookup và harness. Chấp nhận rằng cache có thể làm tăng memory/spill và không giảm shuffle của distinct; nếu median không cải thiện rõ hoặc memory/spill xấu đi, REVERT. Chưa có số đo after cache.

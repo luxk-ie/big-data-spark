@@ -1,0 +1,330 @@
+[
+  {
+    "jobId": 30,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      48,
+      47
+    ],
+    "submissionTime": "2026-11-16T06:40:59.022GMT",
+    "completionTime": "2026-11-16T06:40:59.031GMT",
+    "numTasks": 2
+  },
+  {
+    "jobId": 29,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      46
+    ],
+    "submissionTime": "2026-11-16T06:40:58.994GMT",
+    "completionTime": "2026-11-16T06:40:59.011GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 28,
+    "name": "parquet at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      45
+    ],
+    "submissionTime": "2026-11-16T06:40:58.920GMT",
+    "completionTime": "2026-11-16T06:40:58.958GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 27,
+    "name": "collect at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:193",
+    "stageIds": [
+      43,
+      44
+    ],
+    "submissionTime": "2026-11-16T06:40:58.751GMT",
+    "completionTime": "2026-11-16T06:40:58.828GMT",
+    "numTasks": 30
+  },
+  {
+    "jobId": 26,
+    "name": "collect at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:193",
+    "stageIds": [
+      42
+    ],
+    "submissionTime": "2026-11-16T06:40:57.577GMT",
+    "completionTime": "2026-11-16T06:40:58.721GMT",
+    "numTasks": 29
+  },
+  {
+    "jobId": 25,
+    "name": "collect at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:193",
+    "stageIds": [
+      41
+    ],
+    "submissionTime": "2026-11-16T06:40:57.526GMT",
+    "completionTime": "2026-11-16T06:40:57.539GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 24,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      38,
+      39,
+      40
+    ],
+    "submissionTime": "2026-11-16T06:40:57.401GMT",
+    "completionTime": "2026-11-16T06:40:57.445GMT",
+    "numTasks": 49
+  },
+  {
+    "jobId": 23,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      37,
+      36
+    ],
+    "submissionTime": "2026-11-16T06:40:56.067GMT",
+    "completionTime": "2026-11-16T06:40:57.382GMT",
+    "numTasks": 48
+  },
+  {
+    "jobId": 22,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      35
+    ],
+    "submissionTime": "2026-11-16T06:40:49.951GMT",
+    "completionTime": "2026-11-16T06:40:56.035GMT",
+    "numTasks": 29
+  },
+  {
+    "jobId": 21,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      33,
+      34,
+      32
+    ],
+    "submissionTime": "2026-11-16T06:40:49.804GMT",
+    "completionTime": "2026-11-16T06:40:49.836GMT",
+    "numTasks": 31
+  },
+  {
+    "jobId": 20,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      30,
+      31
+    ],
+    "submissionTime": "2026-11-16T06:40:49.669GMT",
+    "completionTime": "2026-11-16T06:40:49.779GMT",
+    "numTasks": 30
+  },
+  {
+    "jobId": 19,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      29
+    ],
+    "submissionTime": "2026-11-16T06:40:48.169GMT",
+    "completionTime": "2026-11-16T06:40:49.622GMT",
+    "numTasks": 29
+  },
+  {
+    "jobId": 18,
+    "name": "$anonfun$withThreadLocalCaptured$1 at FutureTask.java:264",
+    "stageIds": [
+      28
+    ],
+    "submissionTime": "2026-11-16T06:40:48.082GMT",
+    "completionTime": "2026-11-16T06:40:48.094GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 17,
+    "name": "first at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:127",
+    "stageIds": [
+      27,
+      25,
+      26
+    ],
+    "submissionTime": "2026-11-16T06:40:47.949GMT",
+    "completionTime": "2026-11-16T06:40:47.967GMT",
+    "numTasks": 31
+  },
+  {
+    "jobId": 16,
+    "name": "first at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:127",
+    "stageIds": [
+      24,
+      23
+    ],
+    "submissionTime": "2026-11-16T06:40:47.825GMT",
+    "completionTime": "2026-11-16T06:40:47.923GMT",
+    "numTasks": 30
+  },
+  {
+    "jobId": 15,
+    "name": "first at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:127",
+    "stageIds": [
+      22
+    ],
+    "submissionTime": "2026-11-16T06:40:46.597GMT",
+    "completionTime": "2026-11-16T06:40:47.793GMT",
+    "numTasks": 29
+  },
+  {
+    "jobId": 14,
+    "name": "first at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:127",
+    "stageIds": [
+      21
+    ],
+    "submissionTime": "2026-11-16T06:40:46.454GMT",
+    "completionTime": "2026-11-16T06:40:46.484GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 13,
+    "name": "collect at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:122",
+    "stageIds": [
+      19,
+      20
+    ],
+    "submissionTime": "2026-11-16T06:40:46.273GMT",
+    "completionTime": "2026-11-16T06:40:46.321GMT",
+    "numTasks": 30
+  },
+  {
+    "jobId": 12,
+    "name": "collect at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:122",
+    "stageIds": [
+      18
+    ],
+    "submissionTime": "2026-11-16T06:40:45.683GMT",
+    "completionTime": "2026-11-16T06:40:46.228GMT",
+    "numTasks": 29
+  },
+  {
+    "jobId": 11,
+    "name": "collect at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:122",
+    "stageIds": [
+      17
+    ],
+    "submissionTime": "2026-11-16T06:40:45.473GMT",
+    "completionTime": "2026-11-16T06:40:45.504GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 10,
+    "name": "first at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:115",
+    "stageIds": [
+      15,
+      16
+    ],
+    "submissionTime": "2026-11-16T06:40:45.197GMT",
+    "completionTime": "2026-11-16T06:40:45.267GMT",
+    "numTasks": 30
+  },
+  {
+    "jobId": 9,
+    "name": "first at C:\\Users\\ACER\\Documents\\Coding\\big-data-spark\\src\\pipeline_tlc.py:115",
+    "stageIds": [
+      14
+    ],
+    "submissionTime": "2026-11-16T06:40:44.341GMT",
+    "completionTime": "2026-11-16T06:40:45.152GMT",
+    "numTasks": 29
+  },
+  {
+    "jobId": 8,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      12,
+      13
+    ],
+    "submissionTime": "2026-11-16T06:40:43.978GMT",
+    "completionTime": "2026-11-16T06:40:44.057GMT",
+    "numTasks": 30
+  },
+  {
+    "jobId": 7,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      11
+    ],
+    "submissionTime": "2026-11-16T06:40:43.534GMT",
+    "completionTime": "2026-11-16T06:40:43.941GMT",
+    "numTasks": 29
+  },
+  {
+    "jobId": 6,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      9,
+      10,
+      8
+    ],
+    "submissionTime": "2026-11-16T06:40:43.307GMT",
+    "completionTime": "2026-11-16T06:40:43.326GMT",
+    "numTasks": 3
+  },
+  {
+    "jobId": 5,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      6,
+      7
+    ],
+    "submissionTime": "2026-11-16T06:40:43.189GMT",
+    "completionTime": "2026-11-16T06:40:43.278GMT",
+    "numTasks": 2
+  },
+  {
+    "jobId": 4,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      5
+    ],
+    "submissionTime": "2026-11-16T06:40:42.315GMT",
+    "completionTime": "2026-11-16T06:40:43.128GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 3,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      3,
+      4
+    ],
+    "submissionTime": "2026-11-16T06:40:41.929GMT",
+    "completionTime": "2026-11-16T06:40:42.008GMT",
+    "numTasks": 2
+  },
+  {
+    "jobId": 2,
+    "name": "count at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      2
+    ],
+    "submissionTime": "2026-11-16T06:40:41.701GMT",
+    "completionTime": "2026-11-16T06:40:41.843GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 1,
+    "name": "csv at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      1
+    ],
+    "submissionTime": "2026-11-16T06:40:41.077GMT",
+    "completionTime": "2026-11-16T06:40:41.270GMT",
+    "numTasks": 1
+  },
+  {
+    "jobId": 0,
+    "name": "parquet at NativeMethodAccessorImpl.java:0",
+    "stageIds": [
+      0
+    ],
+    "submissionTime": "2026-11-16T06:40:37.880GMT",
+    "completionTime": "2026-11-16T06:40:38.545GMT",
+    "numTasks": 1
+  }
+]
