@@ -8,5 +8,13 @@ $env:PATH = "$env:JAVA_HOME/bin;$env:PATH"
 $env:PYSPARK_PYTHON = "$projectRoot/.venv/Scripts/python.exe"
 $env:SPARK_LOCAL_IP = '127.0.0.1'
 Push-Location $projectRoot
-try { & $env:PYSPARK_PYTHON $Script @ScriptArgs; $result = $LASTEXITCODE } finally { Pop-Location }
+try {
+    # Windows PowerShell 5 reports native stderr as errors; Spark writes warnings there.
+    $ErrorActionPreference = 'Continue'
+    & $env:PYSPARK_PYTHON $Script @ScriptArgs
+    $result = $LASTEXITCODE
+} finally {
+    $ErrorActionPreference = 'Stop'
+    Pop-Location
+}
 exit $result

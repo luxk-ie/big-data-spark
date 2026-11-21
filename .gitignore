@@ -3,6 +3,8 @@
 .report-build/
 .agents/
 .codex/
+.agents/
+.codex/
 .archify/
 AGENTS.md
 INSTRUCTIONS.md

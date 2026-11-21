@@ -7,7 +7,7 @@ Roadmap này phân biệt yêu cầu đã giao với dự kiến kỹ thuật. D
 | Đồ án 1 / proposal | Brief, mẫu pitch và workshop đã có; **PENDING** proposal đã điền và feedback duyệt | Brief §1–2 yêu cầu problem, hai dataset ứng viên, FR/NFR đo được, kiến trúc v1 và kế hoạch nhóm; cần đối chiếu đề tài đã duyệt với việc đổi từ NYC 311 sang TLC |
 | Đồ án 2 / Checkpoint 2 | Đã chạy và có tag `checkpoint-2` | Ingest TLC nguyên bản, manifest, ba rerun, Spark đọc raw, báo cáo và evidence |
 | Đồ án 3 / Checkpoint 3, Buổi 8 | **VERIFIED** pipeline/full run/rerun và slide 6 trang; **PENDING** thông tin nhóm, trình bày và chốt đề tài | Raw → ≥3 transform → join → aggregate → output; quality, baseline, rerun, báo cáo tại `reports/checkpoint3.md` |
-| Đồ án 4 / Buổi 10 / performance | Baseline, bottleneck, ba thí nghiệm, correctness, KEEP và slide mẫu **VERIFIED**; pitch/nộp bài **PENDING** | Median baseline 23,884 s; optimized batch đầu 23,217 s, repeat được đối chiếu riêng. Báo cáo: `reports/checkpoint4.md`; slide: `reports/Checkpoint4_Report.pptx` |
+| Đồ án 4 / Buổi 10 / performance | Baseline, bottleneck, ba thí nghiệm, correctness, KEEP và slide mẫu **VERIFIED**; pitch/nộp bài **PENDING** | Median baseline 23,884 s; optimized batch đầu 23,217 s; đo lại 20/11 median 20,191 s, không có baseline cùng ngày. Báo cáo: `reports/checkpoint4.md`; slide: `reports/Checkpoint4_Report.pptx` |
 | Các đồ án sau | Chưa có yêu cầu | Chỉ mở rộng khi nhận đề; cân nhắc nhiều tháng, dashboard hoặc ML nếu rubric và thời gian cho phép |
 
 ## Trình tự công việc tiếp theo

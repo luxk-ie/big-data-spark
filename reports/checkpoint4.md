@@ -1,6 +1,6 @@
 # Báo cáo Đồ án 4 — Benchmark và tối ưu pipeline
 
-**Nhóm 13 — Nguyễn Phú Vinh.** Trạng thái kỹ thuật: **VERIFIED** trên NYC TLC Yellow Taxi 01/2025 ngày 16/11/2026. Baseline tag `checkpoint4-baseline` (`e4dc1f0`); optimized code commit `afdbdce`; quyết định **KEEP**. Bản trình chiếu theo mẫu giảng viên: `reports/Checkpoint4_Report.pptx` (6 slide, số đo thật). Pitch trên lớp vẫn **PENDING**.
+**Nhóm 13 — Nguyễn Phú Vinh.** Trạng thái kỹ thuật: **VERIFIED** trên NYC TLC Yellow Taxi 01/2025; đo ban đầu ngày 16/11/2026, đo lại optimized ngày 20/11/2026. Tag GitHub `checkpoint4-baseline` (`0721228`) giữ cùng SHA-256 code với commit đo gốc `e4dc1f0`; code optimized trên GitHub ở `7c9f499` giữ cùng SHA-256 với commit đo gốc `afdbdce`; quyết định **KEEP**. Bản trình chiếu theo mẫu giảng viên: `reports/Checkpoint4_Report.pptx` (6 slide, số đo thật). Pitch trên lớp vẫn **PENDING**.
 
 ## A. Baseline
 
@@ -31,9 +31,11 @@ Hai thử nghiệm trước bị **REVERT**: giảm `spark.sql.files.maxPartitio
 
 Do runtime batch đầu dao động, đã đo bổ sung: 5 run optimized median **20,951 s** (20,493–22,387 s), rồi 3 run lại từ đúng bytes baseline tag median **25,250 s** (24,373–25,621 s), giảm **17,03%** ở cặp batch gần thời điểm. Đây là phép xác nhận bổ sung, không thay cho bảng ba run đầu; sự chênh lệch giữa các batch được ghi là giới hạn đo. Từng run và hash/code/config tại `reports/benchmark.csv`; explain optimized tại `reports/explain-after.txt`.
 
+**Đo lại optimized ngày 20/11/2026 — VERIFIED:** batch `20261120T123736538Z` có warm-up **22,288 s** (không tính) và ba run **20,191 / 19,460 / 20,347 s**, median **20,191 s**; action `duplicate_full_rows` median **3,646 s**. Cùng raw/lookup/code SHA-256, Spark 3.5.8, `local[*]`, 18 cores, AQE và 200 shuffle partitions với các batch optimized trước. Mỗi run cho 4.652 Gold rows, tổng `trip_count` 3.475.204 và Gold SHA-256 không đổi. Median này thấp hơn **15,46%** so với baseline batch đầu 23,884 s, nhưng hai batch đo cách nhau bốn ngày và không có baseline đo cùng ngày; đây là **đối chiếu tham khảo**, không phải speedup được kiểm soát theo cặp. Dữ liệu từng run trong `reports/benchmark.csv`, bằng chứng gọn tại `evidence/checkpoint4/after_hash/20261120T123736538Z/`.
+
 ## E. Correctness
 
-**VERIFIED trên 8 run optimized và 3 run baseline đo lại:**
+**VERIFIED trên 11 run optimized và 3 run baseline đo lại:**
 
 1. `raw_input_rows = invalid_pickup_timestamp_rows + out_of_scope_rows + in_scope_rows = 0 + 22 + 3.475.204 = 3.475.226`.
 2. `joined_rows = in_scope_rows = sum(trip_count) = 3.475.204`; `zone_status.matched = 3.475.204`; `duplicate_full_rows = 0`. Grain `(pickup_date, pickup_hour, pickup_borough)` duy nhất được pipeline assert.
@@ -42,6 +44,13 @@ Do runtime batch đầu dao động, đã đo bổ sung: 5 run optimized median 
 
 ## F. Decision, hạn chế và bước tiếp
 
-**KEEP** optimized code vì correctness giữ nguyên, shuffle/spill giảm đúng giả thuyết và median hai batch after đều thấp hơn baseline tương ứng. Kết luận hiệu năng áp dụng cho snapshot 01/2025 trên máy này; biến thiên warm-up/tải máy và cache hệ điều hành có thể ảnh hưởng runtime. Chưa đo dữ liệu tăng 10×; nếu có nhiều fingerprint lặp, fallback exact có thể làm runtime tăng. Khi nhận brief tiếp theo, kiểm tra khả năng mở rộng nhiều tháng và storage format trước khi đổi kiến trúc.
+**KEEP** optimized code vì correctness giữ nguyên, shuffle/spill giảm đúng giả thuyết; hai batch after ngày 16/11 có median thấp hơn baseline tương ứng và batch đo lại ngày 20/11 tiếp tục ở khoảng 20 s. Kết luận hiệu năng áp dụng cho snapshot 01/2025 trên máy này; biến thiên warm-up/tải máy và cache hệ điều hành có thể ảnh hưởng runtime. Chưa đo dữ liệu tăng 10×; nếu có nhiều fingerprint lặp, fallback exact có thể làm runtime tăng. Khi nhận brief tiếp theo, kiểm tra khả năng mở rộng nhiều tháng và storage format trước khi đổi kiến trúc.
 
-Chạy lại từ root repo bằng `./scripts/benchmark_checkpoint4.ps1 -Variant after_hash -Runs 3` trên optimized commit; raw không nằm trong Git nên máy khác phải ingest hoặc cung cấp đúng snapshot. `scripts/run.ps1` vẫn là entry point cho mọi Spark process. Đối chiếu đầy đủ hai thử nghiệm REVERT và từng batch ở `reports/experiment-log.md`.
+**Next action tối ưu tiếp — PROPOSED cho Checkpoint 5, chờ brief chính thức:**
+
+1. Benchmark pipeline trên nhiều tháng TLC để đo runtime, shuffle và spill khi workload tăng; giữ manifest, schema và quality evidence cho từng tháng.
+2. Dùng `explain` và Spark stage metrics của workload mới để xác định bottleneck thực tế, gồm các lần đọc lại raw, shuffle và nhánh fallback kiểm duplicate nếu phát sinh.
+3. Thử **từng thay đổi riêng**: gom các phép kiểm quality để giảm scan lặp, hoặc chỉnh `spark.sql.shuffle.partitions` theo stage metrics. Mỗi thử nghiệm có warm-up, ít nhất ba run đo và đối soát row count, grain, `trip_count`, Gold checksum. Chỉ **KEEP** khi correctness giữ nguyên và median cải thiện; nếu không thì **REVERT**.
+
+Chạy lại từ root repo bằng `./scripts/benchmark_checkpoint4.ps1 -Variant after_hash -Runs 3` trên optimized commit; repo GitHub đã có snapshot raw lịch sử của Checkpoint 2/3, còn snapshot mới cần ingest riêng. `scripts/run.ps1` vẫn là entry point cho mọi Spark process. Đối chiếu đầy đủ hai thử nghiệm REVERT và từng batch ở `reports/experiment-log.md`.
+Trong `reports/benchmark.csv`, cột `commit` giữ SHA gốc của máy đã đo. Lịch sử GitHub được tái tạo trên nhánh công bố không chứa file agent; commit SHA vì thế khác, còn `code_sha256` của `src/pipeline_tlc.py` trùng chính xác và là khóa đối chiếu phép đo.

@@ -1,0 +1,87 @@
+== Physical Plan ==
+AdaptiveSparkPlan (14)
++- HashAggregate (13)
+   +- Exchange (12)
+      +- HashAggregate (11)
+         +- Project (10)
+            +- Project (9)
+               +- BroadcastHashJoin LeftOuter BuildRight (8)
+                  :- Project (3)
+                  :  +- Filter (2)
+                  :     +- Scan parquet  (1)
+                  +- BroadcastExchange (7)
+                     +- Project (6)
+                        +- Filter (5)
+                           +- Scan csv  (4)
+
+
+(1) Scan parquet 
+Output [2]: [tpep_pickup_datetime#1, PULocationID#7]
+Batched: true
+Location: InMemoryFileIndex [file:/C:/Users/ACER/Documents/Coding/big-data-spark/data/raw/nyc_tlc_yellow/ingest_date=2026-10-23/run_20261023T085112919770Z_3632e145/yellow_tripdata_2025-01.parquet]
+PushedFilters: [IsNotNull(tpep_pickup_datetime), GreaterThanOrEqual(tpep_pickup_datetime,2025-01-01T00:00), LessThan(tpep_pickup_datetime,2025-02-01T00:00)]
+ReadSchema: struct<tpep_pickup_datetime:timestamp_ntz,PULocationID:int>
+
+(2) Filter
+Input [2]: [tpep_pickup_datetime#1, PULocationID#7]
+Condition : ((isnotnull(tpep_pickup_datetime#1) AND (tpep_pickup_datetime#1 >= 2025-01-01 00:00:00)) AND (tpep_pickup_datetime#1 < 2025-02-01 00:00:00))
+
+(3) Project
+Output [2]: [tpep_pickup_datetime#1 AS pickup#40, PULocationID#7 AS pickup_location_id#42]
+Input [2]: [tpep_pickup_datetime#1, PULocationID#7]
+
+(4) Scan csv 
+Output [2]: [LocationID#102, Borough#103]
+Batched: false
+Location: InMemoryFileIndex [file:/C:/Users/ACER/Documents/Coding/big-data-spark/data/reference/taxi_zone_lookup.csv]
+ReadSchema: struct<LocationID:string,Borough:string>
+
+(5) Filter
+Input [2]: [LocationID#102, Borough#103]
+Condition : isnotnull(cast(LocationID#102 as int))
+
+(6) Project
+Output [2]: [cast(LocationID#102 as int) AS LocationID#110, Borough#103]
+Input [2]: [LocationID#102, Borough#103]
+
+(7) BroadcastExchange
+Input [2]: [LocationID#110, Borough#103]
+Arguments: HashedRelationBroadcastMode(List(cast(input[0, int, true] as bigint)),false), [plan_id=1170]
+
+(8) BroadcastHashJoin
+Left keys [1]: [pickup_location_id#42]
+Right keys [1]: [LocationID#110]
+Join type: LeftOuter
+Join condition: None
+
+(9) Project
+Output [3]: [pickup#40, Borough#103, CASE WHEN isnull(pickup_location_id#42) THEN null_key WHEN isnull(LocationID#110) THEN unmatched ELSE matched END AS zone_status#160]
+Input [4]: [pickup#40, pickup_location_id#42, LocationID#110, Borough#103]
+
+(10) Project
+Output [3]: [CASE WHEN (zone_status#160 = null_key) THEN Unknown (null key) WHEN (zone_status#160 = unmatched) THEN Unknown (unmatched key) ELSE coalesce(Borough#103, Unknown (lookup null)) END AS pickup_borough#173, cast(pickup#40 as date) AS pickup_date#187, hour(pickup#40, Some(UTC)) AS pickup_hour#202]
+Input [3]: [pickup#40, Borough#103, zone_status#160]
+
+(11) HashAggregate
+Input [3]: [pickup_borough#173, pickup_date#187, pickup_hour#202]
+Keys [3]: [pickup_date#187, pickup_hour#202, pickup_borough#173]
+Functions [1]: [partial_count(1)]
+Aggregate Attributes [1]: [count#349L]
+Results [4]: [pickup_date#187, pickup_hour#202, pickup_borough#173, count#350L]
+
+(12) Exchange
+Input [4]: [pickup_date#187, pickup_hour#202, pickup_borough#173, count#350L]
+Arguments: hashpartitioning(pickup_date#187, pickup_hour#202, pickup_borough#173, 200), ENSURE_REQUIREMENTS, [plan_id=1176]
+
+(13) HashAggregate
+Input [4]: [pickup_date#187, pickup_hour#202, pickup_borough#173, count#350L]
+Keys [3]: [pickup_date#187, pickup_hour#202, pickup_borough#173]
+Functions [1]: [count(1)]
+Aggregate Attributes [1]: [count(1)#233L]
+Results [4]: [pickup_date#187, pickup_hour#202, pickup_borough#173, count(1)#233L AS trip_count#234L]
+
+(14) AdaptiveSparkPlan
+Output [4]: [pickup_date#187, pickup_hour#202, pickup_borough#173, trip_count#234L]
+Arguments: isFinalPlan=false
+
+
